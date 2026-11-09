@@ -17,7 +17,8 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(APP_CACHE)
-      .then((cache) => cache.addAll(APP_FILES))
+      // 'reload' skips the browser's HTTP cache. Otherwise a new version could store the old page.
+      .then((cache) => cache.addAll(APP_FILES.map((file) => new Request(file, { cache: 'reload' }))))
       .then(() => self.skipWaiting()),
   );
 });

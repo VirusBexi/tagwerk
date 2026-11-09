@@ -7865,7 +7865,7 @@ function initSheetDrag() {
 /* ------------------------------------------------------------- Service worker */
 /** The fonts of the very first visit load before the worker runs. Fetch them once more through it, for offline use. */
 function warmFontCache() {
-  const link = $('link[href*="fonts.googleapis"]');
+  const link = $('link[rel="stylesheet"][href*="fonts.googleapis"]');
   if (!link) return;
   fetch(link.href)
     .then((r) => r.text())

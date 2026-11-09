@@ -88,10 +88,13 @@ const out = (p) => new URL(`../${p}`, import.meta.url);
 mkdirSync(out('docs'), { recursive: true });
 mkdirSync(out('build'), { recursive: true });
 
-const hash = createHash('sha1').update(pwa).digest('hex').slice(0, 10);
+// Any change to what the app ships makes a new version, and with it an update on every device.
+const manifestJson = JSON.stringify(manifest, null, 2);
+const swSource = read('sw.js');
+const hash = createHash('sha1').update(pwa).update(manifestJson).update(swSource).digest('hex').slice(0, 10);
 writeFileSync(out('docs/index.html'), pwa);
-writeFileSync(out('docs/manifest.webmanifest'), JSON.stringify(manifest, null, 2));
-writeFileSync(out('docs/sw.js'), read('sw.js').replace('__VERSION__', hash));
+writeFileSync(out('docs/manifest.webmanifest'), manifestJson);
+writeFileSync(out('docs/sw.js'), swSource.replace('__VERSION__', hash));
 writeFileSync(out('docs/.nojekyll'), '');
 writeFileSync(out('build/artifact.html'), artifact);
 writeFileSync(out('build/app-check.js'), script('pwa'));

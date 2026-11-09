@@ -20,6 +20,8 @@ const DEFAULT_LOCAL = {
   lastXp: 25,
   sync: null,
   installDismissed: false,
+  sky: 'abendrot',
+  badges: null, // { badgeId: 'YYYY-MM-DD' | '' } – which unlocks this device has already celebrated
 };
 
 const blankState = () => ({ v: 1, cats: {}, tasks: {}, done: {}, tpls: {}, rems: {}, goals: {} });

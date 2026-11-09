@@ -3157,6 +3157,689 @@ button.sky-btn.only-phone {
   }
 }
 
+/* ================================================================= Erfolge
+   A medal is a small sun: hard-edged rings in the colour of its group. A locked
+   one is grey and wears its progress as a thin ring. */
+.medal {
+  --s: 56px;
+  --p: 0;
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: var(--c, var(--sun));
+}
+.medal i {
+  position: relative;
+  font-style: normal;
+  font-size: calc(var(--s) * 0.42);
+  line-height: 1;
+}
+.medal.on {
+  box-shadow: inset 0 0 0 calc(var(--s) * 0.1) rgba(20, 18, 43, 0.22);
+}
+@supports (color: color-mix(in srgb, red, blue)) {
+  .medal.on {
+    box-shadow: none;
+    background: radial-gradient(
+      circle closest-side,
+      color-mix(in srgb, var(--c), #fff 40%) 0 60%,
+      var(--c) 61% 80%,
+      color-mix(in srgb, var(--c), var(--ink) 36%) 81% 100%
+    );
+  }
+}
+.medal.off {
+  background: var(--tile-2);
+}
+.medal.off i {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+.medal.off::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--c, var(--sun)) calc(var(--p) * 1%), transparent 0);
+  -webkit-mask: radial-gradient(circle closest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+  mask: radial-gradient(circle closest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+}
+
+/* The banner that drops in when a badge is earned. */
+.bdg-root {
+  position: fixed;
+  z-index: 78;
+  top: calc(var(--st) + 10px);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.bdg-pop {
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(372px, calc(100vw - 24px));
+  padding: 10px 16px 10px 10px;
+  border-radius: 22px;
+  background: var(--panel-2);
+  box-shadow:
+    0 14px 40px rgba(4, 5, 20, 0.6),
+    inset 0 0 0 1.5px var(--c, var(--sun));
+  text-align: left;
+  overflow: hidden;
+  animation: bdgIn 0.62s var(--spring) backwards;
+}
+.bdg-pop.out {
+  animation: bdgOut 0.24s ease-in forwards;
+}
+.bdg-pop .medal {
+  --s: 52px;
+  animation: medalPop 0.7s 0.2s var(--spring) backwards;
+}
+.bdg-pop-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 36%, rgba(255, 255, 255, 0.17) 50%, transparent 64%);
+  transform: translateX(-100%);
+  animation: bdgShine 1.05s 0.5s ease-out forwards;
+  pointer-events: none;
+}
+.bdg-pop-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.bdg-pop-text small {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sun);
+}
+.bdg-pop-text b {
+  font: 800 18px/1.15 var(--display);
+}
+.bdg-pop-text span {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--fg-2);
+}
+@supports (color: color-mix(in srgb, red, blue)) {
+  .bdg-pop-text small {
+    color: color-mix(in srgb, var(--c, var(--sun)), #fff 35%);
+  }
+}
+@keyframes bdgIn {
+  from {
+    opacity: 0;
+    transform: translateY(-130%) scale(0.92);
+  }
+}
+@keyframes bdgOut {
+  to {
+    opacity: 0;
+    transform: translateY(-60%) scale(0.96);
+  }
+}
+@keyframes medalPop {
+  from {
+    transform: scale(0) rotate(-40deg);
+  }
+}
+@keyframes bdgShine {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.lvl-extra {
+  margin-top: 10px;
+  padding: 6px 13px;
+  border-radius: 99px;
+  background: rgba(20, 18, 43, 0.14);
+  font-size: 13.5px;
+  font-weight: 700;
+  animation: pageIn 0.4s 1.12s var(--ease) backwards;
+}
+
+/* The section in the Level tab. */
+.bdg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bdg-sum {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 14px;
+  border-radius: 20px;
+  background: var(--row);
+  text-align: left;
+  transition: transform 0.16s var(--ease);
+}
+.bdg-sum:active {
+  transform: scale(0.985);
+}
+.bdg-sum > .ic {
+  margin-left: auto;
+  font-size: 20px;
+  color: var(--fg-3);
+}
+.bdg-stack {
+  display: flex;
+  flex: none;
+}
+.bdg-stack-i {
+  position: relative;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--row);
+}
+.bdg-stack-i + .bdg-stack-i {
+  margin-left: -10px;
+}
+.bdg-sum-t {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.bdg-sum-t b {
+  font: 700 19px/1.2 var(--display);
+}
+.bdg-sum-t span {
+  font-size: 12.5px;
+  color: var(--fg-3);
+}
+.bdg-next-h {
+  padding: 4px 2px 0;
+  font-size: 12.5px;
+  color: var(--fg-3);
+}
+.bdg-next {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.bdg-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 14px 10px 11px;
+  border-radius: 20px;
+  background: var(--row);
+  text-align: center;
+  transition: transform 0.16s var(--ease);
+}
+.bdg-tile:active {
+  transform: scale(0.97);
+}
+.bdg-tile b {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-height: 2.5em;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.bdg-tile .bar {
+  width: 100%;
+  margin-top: auto;
+}
+.bdg-tile small {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--fg-3);
+}
+
+/* The gallery sheet. */
+.h2-count {
+  margin-left: 6px;
+  font: 600 14px var(--body);
+  font-stretch: 100%;
+  color: var(--fg-3);
+}
+.sheet-body:last-child {
+  padding-bottom: calc(14px + var(--sb));
+}
+.bdg-detail {
+  position: sticky;
+  top: -4px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 118px;
+  margin: -4px -16px 0;
+  padding: 8px 16px 14px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.bdg-detail-t {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.bdg-detail-t > b {
+  font: 800 20px/1.15 var(--display);
+}
+.bdg-detail-t > b + span {
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--fg-2);
+}
+.bdg-detail-t .bar {
+  margin-top: 6px;
+}
+.bdg-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-3);
+}
+.bdg-state.ok {
+  margin-top: 4px;
+  font-weight: 600;
+  color: var(--ok);
+}
+.bdg-state .ic {
+  font-size: 14px;
+}
+.bdg-group h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 2px 6px;
+  font: 600 12px var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.bdg-group h3 small {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.bdg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.bdg-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 3px 9px;
+  border-radius: 16px;
+  text-align: center;
+  transition: background 0.16s;
+}
+.bdg-cell > span:last-child {
+  max-width: 100%;
+  font-size: 11.5px;
+  line-height: 1.2;
+  color: var(--fg-3);
+  overflow-wrap: break-word;
+}
+.bdg-cell.done > span:last-child {
+  font-weight: 600;
+  color: var(--fg);
+}
+.bdg-cell.sel {
+  background: var(--tile-2);
+  box-shadow: inset 0 0 0 1.5px var(--c, var(--sun));
+}
+
+/* ========================================================== Wochenrückblick
+   One hue, seven bars on a baseline. Only the best day carries its number. */
+.wkc {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 12px 14px 16px;
+  border-radius: 20px;
+  background: var(--row);
+}
+.wkc-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.wkc-xp {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.wkc-xp b {
+  font: 800 46px/1 var(--display);
+  font-stretch: 85%;
+  font-variant-numeric: tabular-nums;
+}
+.wkc-xp small {
+  font: 700 16px var(--display);
+  color: var(--fg-3);
+}
+.wkc-delta {
+  font-size: 13.5px;
+  color: var(--fg-2);
+}
+.wkc-delta i {
+  margin-right: 5px;
+  font-style: normal;
+  font-size: 10px;
+}
+.wkc-delta.up {
+  color: var(--ok);
+}
+.wkc-chart {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.wkc-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+}
+.wkc-plot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 114px;
+  border-bottom: 1px solid var(--line);
+}
+.wkc-plot em {
+  position: relative;
+  font: 700 12px/1.2 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+/* The week before: wider, pale, behind. */
+.wkc-plot u {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(78%, 40px);
+  margin-left: calc(min(78%, 40px) / -2);
+  border-radius: 4px 4px 0 0;
+  background: var(--tile-2);
+  transition: height 0.45s var(--ease);
+}
+.wkc-plot i {
+  position: relative;
+  flex: none;
+  width: min(58%, 28px);
+  border-radius: 4px 4px 0 0;
+  background: var(--sun);
+  transform-origin: 50% 100%;
+  transition:
+    height 0.45s var(--ease),
+    background 0.16s;
+  animation: barUp 0.6s var(--ease) backwards;
+}
+.wkc-col.sel .wkc-plot i {
+  background: #ffdd96;
+}
+@media (hover: hover) {
+  .wkc-col:hover .wkc-plot i {
+    background: #ffdd96;
+  }
+}
+.wkc-col.zero:not(.future) .wkc-plot i {
+  height: 2px !important;
+  border-radius: 0;
+  background: var(--tile-2);
+}
+.wkc-wd {
+  font-size: 12px;
+  text-align: center;
+  color: var(--fg-3);
+}
+.wkc-col.now .wkc-wd {
+  font-weight: 700;
+  color: var(--fg);
+}
+.wkc-col.sel .wkc-wd {
+  font-weight: 700;
+  color: var(--sun);
+}
+.wkc-tip {
+  min-height: 1.4em;
+  margin-top: -4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--fg-2);
+}
+.stats.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.wkc-cats {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wkc-cats li {
+  display: grid;
+  grid-template-columns: minmax(0, 112px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+}
+.wkc-cat {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--fg-2);
+}
+.wkc-cats b {
+  min-width: 2.8em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+@keyframes barUp {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+/* =================================================================== Himmel */
+.sky-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 128px;
+  gap: 10px;
+  margin: 0 calc(-1 * var(--gutter-r)) 0 calc(-1 * var(--gutter-l));
+  padding: 6px var(--gutter-r) 6px var(--gutter-l);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--gutter-l);
+  scrollbar-width: none;
+}
+.sky-strip::-webkit-scrollbar {
+  display: none;
+}
+.sky-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+  scroll-snap-align: start;
+}
+.sky-frame {
+  position: relative;
+  display: block;
+  margin-bottom: 6px;
+  border-radius: 16px;
+  overflow: hidden;
+  transition:
+    transform 0.2s var(--spring),
+    box-shadow 0.2s;
+}
+.sky-card:active .sky-frame {
+  transform: scale(0.96);
+}
+.sky-pic {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.sky-card.on .sky-frame {
+  box-shadow:
+    0 0 0 2px var(--ground),
+    0 0 0 4.5px var(--sun);
+}
+.sky-card.locked .sky-pic {
+  filter: saturate(0.55) brightness(0.7);
+}
+.sky-mark {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(11, 13, 36, 0.72);
+  font-size: 14px;
+  color: var(--fg);
+}
+.sky-mark.on {
+  background: var(--sun);
+  color: var(--ink);
+}
+.sky-name {
+  font: 700 14.5px/1.2 var(--display);
+}
+.sky-card.locked .sky-name {
+  color: var(--fg-2);
+}
+.sky-note {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--fg-3);
+}
+
+/* ======================================================= Sortieren per Ziehen */
+.row-wrap[data-drag] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.list.sorting .row-wrap:not(.dragging) {
+  transition: transform 0.24s var(--ease);
+}
+.row-wrap.dragging,
+.row-wrap.dropping {
+  z-index: 6;
+}
+.row-wrap .row {
+  transition:
+    box-shadow 0.2s,
+    background 0.2s;
+}
+.row-wrap.dragging .row {
+  background: var(--panel-2);
+  box-shadow: 0 14px 34px rgba(4, 5, 20, 0.55);
+}
+.row-wrap.dragging .row-under {
+  visibility: hidden;
+}
+html.is-sorting,
+html.is-sorting * {
+  cursor: grabbing !important;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ============================================================ Schnelleingabe */
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  margin-top: -8px;
+}
+.quick .hint {
+  line-height: 1.35;
+}
+.qchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 9px 0 12px;
+  border-radius: 99px;
+  background: rgba(255, 193, 69, 0.15);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sun);
+  animation: chipPop 0.3s var(--spring) backwards;
+}
+.qchip:active {
+  transform: scale(0.94);
+}
+.qchip .ic {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+@media (min-width: 960px) {
+  .bdg-root {
+    top: 18px;
+    left: calc(96px + 33vw);
+  }
+  .bdg-grid {
+    gap: 8px;
+  }
+  .wkc {
+    padding: 14px 18px 18px;
+  }
+  .wkc-plot i {
+    width: min(50%, 34px);
+  }
+  .sky-strip {
+    grid-auto-columns: minmax(0, 1fr);
+    margin: 0;
+    padding: 6px 0;
+    overflow: visible;
+  }
+  .row-wrap[data-drag] .row {
+    cursor: grab;
+  }
+}
+
 /* Motion off: no decoration, everything still works. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -3195,6 +3878,7 @@ button.sky-btn.only-phone {
 </div>
 <div id="hud" class="hud" aria-live="polite"></div>
 <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+<div id="badgeRoot" class="bdg-root" aria-live="polite"></div>
 <div id="sheetRoot"></div>
 <div id="dialogRoot"></div>
 <div id="levelRoot"></div>
@@ -3203,7 +3887,7 @@ button.sky-btn.only-phone {
 <script>
 (() => {
 const TARGET = 'pwa';
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 'use strict';
 
 /* ------------------------------------------------------------------ DOM */
@@ -3322,6 +4006,8 @@ const DEFAULT_LOCAL = {
   lastXp: 25,
   sync: null,
   installDismissed: false,
+  sky: 'abendrot',
+  badges: null, // { badgeId: 'YYYY-MM-DD' | '' } – which unlocks this device has already celebrated
 };
 
 const blankState = () => ({ v: 1, cats: {}, tasks: {}, done: {}, tpls: {}, rems: {}, goals: {} });
@@ -3964,6 +4650,458 @@ function icsFor(rem, today = todayStr()) {
   return lines.join('\r\n');
 }
 
+/* =================================================================== ERFOLGE
+   Badges are never stored: each one is a pure function of the data that is
+   there anyway, so they follow you to every device and can't get out of step.
+   Only "this device already celebrated it" is remembered, in L.badges. */
+
+const BADGE_GROUPS = [
+  { id: 'tasks', name: 'Aufgaben', color: '#FFC145' },
+  { id: 'streak', name: 'Serien', color: '#FF7A59' },
+  { id: 'perfect', name: 'Perfekte Tage', color: '#FFE28C' },
+  { id: 'xp', name: 'XP', color: '#8F9BFF' },
+  { id: 'day', name: 'Tagesform', color: '#37D5D6' },
+  { id: 'time', name: 'Uhrzeit', color: '#FF6F91' },
+  { id: 'goals', name: 'Ziele', color: '#5FE3A1' },
+  { id: 'level', name: 'Level', color: '#FA9537' },
+];
+
+/* [id, group, emoji, name, description, goal, stat]. ­ marks where a long name may break. */
+const BADGES = [
+  ['first', 'tasks', '👣', 'Erster Schritt', 'Erledige deine erste Aufgabe.', 1, 'tasks'],
+  ['t10', 'tasks', '🏃', 'Warm­gelaufen', 'Erledige 10 Aufgaben.', 10, 'tasks'],
+  ['t50', 'tasks', '💪', 'Macher', 'Erledige 50 Aufgaben.', 50, 'tasks'],
+  ['t100', 'tasks', '💯', 'Drei­stellig', 'Erledige 100 Aufgaben.', 100, 'tasks'],
+  ['t500', 'tasks', '🤖', 'Maschine', 'Erledige 500 Aufgaben.', 500, 'tasks'],
+
+  ['s3', 'streak', '🌱', 'Dran­bleiben', '3 Tage in Folge mindestens eine Aufgabe.', 3, 'streak'],
+  ['s7', 'streak', '📆', 'Eine ganze Woche', '7 Tage in Folge mindestens eine Aufgabe.', 7, 'streak'],
+  ['s14', 'streak', '⚡', 'Zwei Wochen stark', '14 Tage in Folge mindestens eine Aufgabe.', 14, 'streak'],
+  ['s30', 'streak', '🌙', 'Monat ohne Lücke', '30 Tage in Folge mindestens eine Aufgabe.', 30, 'streak'],
+  ['s100', 'streak', '🚀', 'Unauf­haltsam', '100 Tage in Folge mindestens eine Aufgabe.', 100, 'streak'],
+  ['r7', 'streak', '🐾', 'Gewohn­heits­tier', 'Erledige eine Serien-Aufgabe 7-mal hintereinander.', 7, 'habit'],
+
+  ['p1', 'perfect', '✨', 'Reiner Tisch', 'Schaffe an einem Tag alles, was anstand.', 1, 'perfect'],
+  ['p7', 'perfect', '🌞', 'Sieben Sonnen', 'Schaffe 7 perfekte Tage.', 7, 'perfect'],
+  ['p30', 'perfect', '🌻', 'Dauer­sonne', 'Schaffe 30 perfekte Tage.', 30, 'perfect'],
+
+  ['x1000', 'xp', '⭐', 'Tausender', 'Sammle 1.000 XP.', 1000, 'xp'],
+  ['x5000', 'xp', '🌟', 'Fünf­tausender', 'Sammle 5.000 XP.', 5000, 'xp'],
+  ['x20000', 'xp', '🗻', 'Gipfel­stürmer', 'Sammle 20.000 XP.', 20000, 'xp'],
+  ['w500', 'xp', '💎', 'Starke Woche', 'Sammle 500 XP in einer einzigen Woche.', 500, 'weekXp'],
+
+  ['d100', 'day', '👍', 'Guter Tag', 'Sammle 100 XP an einem Tag.', 100, 'dayXp'],
+  ['d250', 'day', '🍰', 'Sahnetag', 'Sammle 250 XP an einem Tag.', 250, 'dayXp'],
+  ['d5', 'day', '🎳', 'Fünf auf einen Streich', 'Erledige 5 Aufgaben an einem Tag.', 5, 'dayTasks'],
+  ['big', 'day', '🐘', 'Dicker Brocken', 'Erledige eine Aufgabe mit 100 XP oder mehr.', 100, 'bigTask'],
+
+  ['early', 'time', '🐓', 'Früh­aufsteher', 'Hake eine Aufgabe vor 8 Uhr morgens ab.', 1, 'early'],
+  ['night', 'time', '🦉', 'Nachteule', 'Hake eine Aufgabe nach 22 Uhr ab.', 1, 'night'],
+  ['weekend', 'time', '🎉', 'Wochenend-Held', 'Erledige am Samstag und am Sonntag etwas.', 1, 'weekend'],
+
+  ['g1', 'goals', '🎯', 'Ziel­strebig', 'Erreiche dein erstes Ziel.', 1, 'goals'],
+  ['g10', 'goals', '🏹', 'Voll­treffer', 'Erreiche 10 Ziele.', 10, 'goals'],
+  ['gbig', 'goals', '🏆', 'Großes Ding', 'Erreiche ein großes Ziel.', 1, 'bigGoals'],
+
+  ['l5', 'level', '📈', 'Auf­steiger', 'Erreiche Gesamt-Level 5.', 5, 'level'],
+  ['l10', 'level', '🔥', 'Feuer und Flamme', 'Erreiche Gesamt-Level 10.', 10, 'level'],
+  ['c5', 'level', '🎓', 'Spezia­list', 'Bringe eine Kategorie auf Level 5.', 5, 'catLevel'],
+  ['all3', 'level', '🌈', 'All­rounder', 'Bringe 3 Kategorien auf Level 3.', 3, 'catsAt3'],
+].map(([id, group, emoji, name, desc, goal, stat]) => ({
+  id,
+  group,
+  emoji,
+  name,
+  desc,
+  goal,
+  stat,
+  color: BADGE_GROUPS.find((g) => g.id === group).color,
+}));
+
+let badgeCache = null;
+
+/** Everything the badges look at, worked out once per change. */
+function badgeStats(today = todayStr()) {
+  if (badgeCache && badgeCache.rev === rev && badgeCache.today === today) return badgeCache.stats;
+  const d = derived();
+  const dates = Object.keys(d.byDate).sort();
+
+  let streak = 0;
+  let run = 0;
+  let prev = null;
+  let dayTasks_ = 0;
+  let bigTask = 0;
+  let early = 0;
+  let night = 0;
+  let weekend = 0;
+  for (const date of dates) {
+    run = prev && diffDays(date, prev) === 1 ? run + 1 : 1;
+    if (run > streak) streak = run;
+    prev = date;
+    const entries = d.byDate[date];
+    if (entries.length > dayTasks_) dayTasks_ = entries.length;
+    if (weekdayOf(date) === 6 && d.byDate[addDays(date, 1)]) weekend = 1;
+    for (const e of entries) {
+      if (e.xp > bigTask) bigTask = e.xp;
+      // Demo history has no real clock time.
+      if (e.demo || !e.at) continue;
+      const h = new Date(e.at).getHours();
+      if (h >= 4 && h < 8) early = 1;
+      if (h >= 22 || h < 4) night = 1;
+    }
+  }
+
+  let dayXp = 0;
+  const weeks = {};
+  for (const [date, xp] of Object.entries(d.xpDay)) {
+    if (xp > dayXp) dayXp = xp;
+    const w = weekStart(date);
+    weeks[w] = (weeks[w] || 0) + xp;
+  }
+  const weekXp = Math.max(0, ...Object.values(weeks));
+
+  let habit = 0;
+  const from = addDays(today, -400);
+  for (const t of live('tasks')) {
+    if (!t.repeat) continue;
+    let n = 0;
+    for (let day = t.repeat.start > from ? t.repeat.start : from; day <= today; day = addDays(day, 1)) {
+      if (!occursOn(t, day)) continue;
+      if (isDone(t.id, day)) {
+        n++;
+        if (n > habit) habit = n;
+      } else if (day !== today) n = 0;
+    }
+  }
+
+  let catLevelMax = 0;
+  let catsAt3 = 0;
+  for (const c of live('cats')) {
+    const lv = catLevel(d.xpCat[c.id] || 0).level;
+    if (lv > catLevelMax) catLevelMax = lv;
+    if (lv >= 3) catsAt3++;
+  }
+
+  const stats = {
+    tasks: d.taskCount,
+    streak,
+    habit,
+    perfect: perfectDays(),
+    xp: d.xpTotal,
+    weekXp,
+    dayXp,
+    dayTasks: dayTasks_,
+    bigTask,
+    early,
+    night,
+    weekend,
+    goals: d.goalCount,
+    bigGoals: live('goals').filter((g) => g.doneAt && g.kind === 'big').length,
+    level: totalLevel(d.xpTotal).level,
+    catLevel: catLevelMax,
+    catsAt3,
+  };
+  badgeCache = { rev, today, stats };
+  return stats;
+}
+
+/** All badges with their progress. `on` is the date it was celebrated here, if known. */
+function badgeList(today = todayStr()) {
+  const s = badgeStats(today);
+  const seen = L.badges || {};
+  return BADGES.map((b) => {
+    const cur = Math.min(s[b.stat] || 0, b.goal);
+    return { ...b, cur, done: cur >= b.goal, pct: cur / b.goal, on: seen[b.id] || '' };
+  });
+}
+
+const badgeCount = () => badgeList().filter((b) => b.done).length;
+
+/** The unfinished badges that are closest to done. */
+const badgesNextUp = (n = 3) =>
+  badgeList()
+    .filter((b) => !b.done)
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, n);
+
+/** Marks everything already earned as celebrated, without any fanfare. Returns how many were new. */
+function badgesMarkQuietly() {
+  const seen = (L.badges = L.badges || {});
+  let n = 0;
+  for (const b of badgeList()) {
+    if (b.done && !(b.id in seen)) {
+      seen[b.id] = '';
+      n++;
+    }
+  }
+  if (n) saveLocal();
+  return n;
+}
+
+/** Badges earned since the last look. Each one is returned exactly once per device. */
+function badgesCollect(today = todayStr()) {
+  const seen = (L.badges = L.badges || {});
+  const fresh = badgeList(today).filter((b) => b.done && !(b.id in seen));
+  for (const b of fresh) seen[b.id] = today;
+  if (fresh.length) saveLocal();
+  return fresh.map((b) => ({ ...b, on: today }));
+}
+
+/** After data was removed: forget celebrations for badges that are no longer earned. */
+function badgesPrune() {
+  if (!L.badges) return;
+  const done = new Set(badgeList().filter((b) => b.done).map((b) => b.id));
+  for (const id of Object.keys(L.badges)) if (!done.has(id)) delete L.badges[id];
+  saveLocal();
+}
+
+/* ============================================================== QUICK ENTRY
+   "Mathe lernen morgen 50xp #schule": words in the title that fill in the form.
+   The parser is pure (no DOM, no state), so the tests run it directly. */
+
+const QUICK_WD = ['montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag', 'sonntag'];
+const QUICK_WD_SHORT = ['mo', 'di', 'mi', 'do', 'fr', 'sa', 'so'];
+const QUICK_MONTHS = ['januar', 'februar', 'm(?:ä|ae)rz', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'dezember'];
+const QUICK_NUM = { ein: 1, eine: 1, einem: 1, einer: 1, zwei: 2, drei: 3, vier: 4, fünf: 5, fuenf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9, zehn: 10 };
+const QUICK_ORDER = ['date', 'repeat', 'xp', 'cat'];
+
+/** Lowercase without accents, to compare names. */
+const quickFold = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss');
+
+/** Every place where `body` stands as a word of its own. No lookbehind (older iPhones do not know it):
+    the character before is captured, the one after is only looked at. */
+function quickFind(low, body) {
+  const out = [];
+  const re = new RegExp(`(^|[\\s(])(${body})(?=$|[\\s,.;:!?)])`, 'gu');
+  for (const m of low.matchAll(re)) {
+    const start = m.index + m[1].length;
+    out.push({ start, end: start + m[2].length, text: m[2], g: m.slice(3) });
+  }
+  return out;
+}
+
+/** 'montag, mi und freitags' → [1, 3, 5] */
+function quickDays(s) {
+  const days = new Set();
+  for (const w of s.split(/[\s,]+/)) {
+    const base = w.length > 2 && w.endsWith('s') ? w.slice(0, -1) : w;
+    const at = QUICK_WD.includes(base) ? QUICK_WD.indexOf(base) : QUICK_WD_SHORT.indexOf(w);
+    if (at >= 0) days.add(at + 1);
+  }
+  return [...days].sort((a, b) => a - b);
+}
+
+function quickRepeatHits(low) {
+  const sep = '(?:\\s*,\\s*|\\s+und\\s+|\\s+)';
+  // A list of one sort only: "jeden Montag so viel lernen" must not turn "so" into Sunday.
+  const list = (names) => `(?:${names.join('|')})(?:${sep}(?:${names.join('|')}))*`;
+  const hits = [];
+  const add = (body, read) => quickFind(low, body).forEach((h) => hits.push({ ...h, days: [], mode: 'weekly', ...read(h) }));
+  add('t(?:ä|ae)glich|jeden\\s+tag', () => ({ days: [1, 2, 3, 4, 5, 6, 7] }));
+  add('werktags', () => ({ days: [1, 2, 3, 4, 5] }));
+  add('jedes\\s+wochenende', () => ({ days: [6, 7] }));
+  add(`jeden\\s+(?:${list(QUICK_WD)}|${list(QUICK_WD_SHORT)})`, (h) => ({ days: quickDays(h.text.slice(5)) }));
+  add(list(QUICK_WD.map((w) => `${w}s`)), (h) => ({ days: quickDays(h.text) }));
+  add('alle\\s+(?:2|zwei)\\s+wochen|jede\\s+zweite\\s+woche|alle\\s+14\\s+tage', () => ({ mode: 'biweekly' }));
+  add('w(?:ö|oe)chentlich|jede\\s+woche', () => ({}));
+  return hits.sort((a, b) => a.start - b.start);
+}
+
+/** A day and month as a date string. Without a year it is the next time that day comes. */
+function quickYmd(day, month, year, today) {
+  const d = Number(day);
+  const m = Number(month);
+  const thisYear = Number(today.slice(0, 4));
+  let y = year ? Number(year) : thisYear;
+  if (year && year.length === 2) y += 2000;
+  if (m < 1 || m > 12 || d < 1 || y > thisYear + 5) return null;
+  const make = (yy) => (d <= daysInMonth(yy, m) ? `${yy}-${pad2(m)}-${pad2(d)}` : null);
+  let s = make(y);
+  if (s && !year && s < today) s = make(y + 1);
+  return s && s >= today ? s : null;
+}
+
+function quickDateHits(low, today) {
+  const pre = '(?:(?:am|bis|ab|f(?:ü|ue)r)\\s+)?';
+  const hits = [];
+  const add = (body, read) =>
+    quickFind(low, body).forEach((h) => {
+      const date = read(h);
+      if (date) hits.push({ ...h, date });
+    });
+  // "Heute Abend" is today, but the words belong together and stay in the title.
+  const dayPart = /^\s+(?:morgen|fr(?:ü|ue)h|vormittag|mittag|nachmittag|abend|nacht)(?=$|[\s,.;:!?)])/;
+  quickFind(low, `${pre}heute`).forEach((h) => hits.push({ ...h, date: today, keep: dayPart.test(low.slice(h.end)) }));
+  // "Guten Morgen", "heute Morgen", "am Morgen", "jeden Morgen": the morning, not tomorrow.
+  add('(?:(?:bis|ab|f(?:ü|ue)r)\\s+)?morgen', (h) => (/(?:^|\s)(?:guten|heute|gestern|am|jeden|den|im)\s+$/.test(low.slice(0, h.start)) ? null : addDays(today, 1)));
+  add(`${pre}(?:ü|ue)bermorgen`, () => addDays(today, 2));
+  add(`(?:(?:am|bis|ab|f(?:ü|ue)r|n(?:ä|ae)chsten|kommenden)\\s+)?(${QUICK_WD.join('|')})`, (h) => {
+    const ahead = (QUICK_WD.indexOf(h.g[0]) + 1 - weekdayOf(today) + 7) % 7 || 7;
+    return addDays(today, ahead);
+  });
+  add(`${pre}n(?:ä|ae)chste\\s+woche`, () => addDays(weekStart(today), 7));
+  add(`in\\s+(\\d{1,3}|${Object.keys(QUICK_NUM).join('|')})\\s+(tag|tagen|woche|wochen)`, (h) => {
+    const n = QUICK_NUM[h.g[0]] || Number(h.g[0]);
+    return n > 0 && n <= 365 ? addDays(today, n * (h.g[1][0] === 'w' ? 7 : 1)) : null;
+  });
+  // 12.11. or 12.11.2026. Without the last dot only after "am", so that "2.5 km" stays a distance.
+  add('((?:am|bis|ab)\\s+)?(\\d{1,2})\\.\\s?(\\d{1,2})(\\.(\\d{4}|\\d{2})?)?', (h) => (h.g[0] || h.g[3] ? quickYmd(h.g[1], h.g[2], h.g[4], today) : null));
+  add(`${pre}(\\d{1,2})\\.\\s?(${QUICK_MONTHS.join('|')})(?:\\s+(\\d{4}))?`, (h) => {
+    const month = QUICK_MONTHS.findIndex((m) => new RegExp(`^${m}$`).test(h.g[1])) + 1;
+    return quickYmd(h.g[0], month, h.g[2], today);
+  });
+  return hits;
+}
+
+function quickCat(tag, cats) {
+  const want = quickFold(tag);
+  const named = cats.map((c) => ({ c, n: quickFold(c.name || '') }));
+  const hit =
+    named.find((x) => x.n === want) ||
+    named.find((x) => x.n.startsWith(want)) ||
+    named.find((x) => x.n.split(/[^a-z0-9]+/).some((w) => w.startsWith(want)));
+  return hit ? hit.c : null;
+}
+
+/**
+ * Reads date, repeat, XP and category out of a title.
+ * `off` holds the keys the user waved away: those words stay plain text.
+ * A repeat with no days means "on the weekday of the start date".
+ */
+function parseQuick(text, today, cats, off) {
+  const src = String(text || '').normalize('NFC');
+  const low = src.toLowerCase();
+  const res = { title: src.trim(), parts: [], date: null, xp: null, catId: null, repeat: null };
+  if (low.length !== src.length || !src.trim()) return res;
+  const skip = off || {};
+  const cut = [];
+  const lastOf = (hits, kind) => {
+    const live = hits.filter((h) => !skip[`${kind}:${h.text}`]).sort((a, b) => a.start - b.start || a.end - b.end);
+    return live[live.length - 1] || null;
+  };
+
+  // Repeats first, and their words are hidden from the date search: "jeden Montag" is not "next Monday".
+  const rep = quickRepeatHits(low);
+  const chars = low.split('');
+  for (const h of rep) chars.fill(' ', h.start, h.end);
+  if (rep.length) {
+    const key = `repeat:${rep.map((h) => h.text).join('+')}`;
+    if (!skip[key]) {
+      const days = [...new Set(rep.flatMap((h) => h.days))].sort((a, b) => a - b);
+      const mode = rep.some((h) => h.mode === 'biweekly') ? 'biweekly' : 'weekly';
+      res.repeat = { days, mode };
+      const label = days.length ? repeatLabel({ days, mode }) : mode === 'biweekly' ? 'Alle 2 Wochen' : 'Jede Woche';
+      res.parts.push({ kind: 'repeat', key, label });
+      cut.push(...rep);
+    }
+  }
+
+  const day = lastOf(quickDateHits(chars.join(''), today), 'date');
+  if (day) {
+    res.date = day.date;
+    const year = day.date.slice(0, 4) === today.slice(0, 4) ? '' : ` ${day.date.slice(0, 4)}`;
+    res.parts.push({ kind: 'date', key: `date:${day.text}`, label: relDay(day.date, today) || fmtWdShort(day.date) + year });
+    if (!day.keep) cut.push(day);
+  }
+
+  const xp = lastOf(
+    quickFind(low, '\\+?(\\d{1,4})\\s?xp|\\+(\\d{1,4})')
+      .map((h) => ({ ...h, xp: Number(h.g[0] || h.g[1]) }))
+      .filter((h) => h.xp > 0),
+    'xp',
+  );
+  if (xp) {
+    res.xp = xp.xp;
+    res.parts.push({ kind: 'xp', key: `xp:${xp.text}`, label: `+${xp.xp} XP` });
+    cut.push(xp);
+  }
+
+  const cat = lastOf(
+    quickFind(low, '#([\\p{L}\\p{N}_-]+)')
+      .map((h) => ({ ...h, cat: quickCat(h.g[0], cats || []) }))
+      .filter((h) => h.cat),
+    'cat',
+  );
+  if (cat) {
+    res.catId = cat.cat.id;
+    res.parts.push({ kind: 'cat', key: `cat:${cat.text}`, label: `${cat.cat.emoji ? `${cat.cat.emoji} ` : ''}${cat.cat.name}` });
+    cut.push(cat);
+  }
+
+  res.parts.sort((a, b) => QUICK_ORDER.indexOf(a.kind) - QUICK_ORDER.indexOf(b.kind));
+  if (!cut.length) return res;
+  const rest = src.split('');
+  for (const h of cut) rest.fill('\n', h.start, h.end);
+  res.title = rest
+    .join('')
+    .replace(/\s+/g, ' ')
+    .replace(/ ([,.;:!?])/g, '$1')
+    .replace(/^[\s,;:.–-]+|[\s,;:–-]+$/g, '');
+  return res;
+}
+
+/* What each kind of word sets in the form of a new task. */
+const QUICK_FIELDS = { date: ['date', 'calMonth'], xp: ['xp'], cat: ['catId'], repeat: ['repeatOn', 'days', 'mode'] };
+
+/**
+ * Brings the form in line with the title. Each word is applied once: what the user then sets by hand stays,
+ * and when the word goes away again, the form returns to what it was before.
+ * Returns whether something changed, and whether a new word was picked up.
+ */
+function applyQuick(d, today = todayStr()) {
+  const q = parseQuick(d.title, today, sortedCats(), d.quickOff);
+  const held = d.quickHeld || (d.quickHeld = {});
+  let touched = false;
+  let fresh = false;
+  for (const kind of QUICK_ORDER) {
+    const keys = QUICK_FIELDS[kind];
+    const snap = () => JSON.stringify(keys.map((k) => d[k]));
+    const part = q.parts.find((p) => p.kind === kind);
+    const h = held[kind];
+    // "Jede Woche" follows the weekday of the date, so a new date makes it a new word.
+    const follows = part && kind === 'repeat' && !q.repeat.days.length;
+    const key = part ? part.key + (follows ? `@${weekdayOf(d.date)}` : '') : '';
+    if (part && h && h.key === key) continue;
+    const byHand = h && snap() !== h.now;
+    if (byHand && follows && h.key.split('@')[0] === part.key) {
+      h.key = key;
+      continue;
+    }
+    let prev = keys.map((k) => (Array.isArray(d[k]) ? [...d[k]] : d[k]));
+    if (h) {
+      if (!byHand) {
+        keys.forEach((k, i) => (d[k] = h.prev[i]));
+        prev = h.prev;
+      }
+      delete held[kind];
+      touched = true;
+    }
+    if (!part) continue;
+    if (kind === 'date') {
+      d.date = q.date;
+      d.calMonth = monthOf(q.date);
+    } else if (kind === 'xp') {
+      d.xp = q.xp;
+    } else if (kind === 'cat') {
+      d.catId = q.catId;
+    } else {
+      d.repeatOn = true;
+      d.days = q.repeat.days.length ? [...q.repeat.days] : [weekdayOf(d.date)];
+      d.mode = q.repeat.mode;
+    }
+    const now = snap();
+    // "#s", "#sc", "#sch" all mean the same category: that is one catch, not three.
+    if (!h || h.now !== now) fresh = true;
+    held[kind] = { key, prev, now };
+    touched = true;
+  }
+  const sig = q.parts.map((p) => `${p.key}=${p.label}`).join('|');
+  if (sig !== (d.quickSig || '')) touched = true;
+  d.quickSig = sig;
+  d.quickParts = q.parts;
+  return { touched, fresh, title: q.title };
+}
+
 /* ===================================================================== SYNC
    Two ways to keep phone and PC on the same data, both built on mergeRemote():
    - Installed app: a private (secret) Gist on the user's own GitHub account.
@@ -4483,6 +5621,32 @@ const Sound = (() => {
       [24, 31, 36].forEach((s, i) => bell(m2f(r + s), t + 0.86 + i * 0.13, 2, 0.18));
       thump(t + 0.72, 0.55, 100, 40, 0.5);
     },
+    /* A medal lands: a metallic clink, then a short sparkle that climbs. */
+    badge(t) {
+      const r = PACKS[L.pack].root;
+      thump(t, 0.5, 160, 60, 0.16);
+      bell(m2f(r + 19), t, 0.5, 0.26, 2.76, 1.6);
+      bell(m2f(r + 31), t + 0.012, 0.32, 0.12, 3.4, 1.2);
+      [12, 16, 19, 24, 28].forEach((s, i) => note(r + s, t + 0.16 + i * 0.07, 0.3));
+      pad([r - 12, r - 5, r, r + 4], t + 0.16, 1.3, 0.04);
+      bell(m2f(r + 36), t + 0.54, 1.5, 0.16);
+    },
+    /* Picking a row up and setting it down again. */
+    grab(t) {
+      tone('sine', 300, t, 0.09, 0.34, { to: 560, send: 0.1 });
+      noise(t, 0.05, 0.12, { f: 2400 });
+    },
+    drop(t) {
+      thump(t, 0.4, 190, 80, 0.09);
+      note(PACKS[L.pack].root - 5, t + 0.012, 0.3);
+    },
+    /* A new sky rolls in. */
+    sky(t) {
+      const r = PACKS[L.pack].root - 12;
+      noise(t, 0.7, 0.16, { f: 500, to: 3800, q: 0.6 });
+      pad([r, r + 7, r + 11, r + 16], t + 0.05, 1.5, 0.045);
+      [12, 19, 23, 28].forEach((s, i) => note(r + s, t + 0.2 + i * 0.09, 0.24));
+    },
   };
 
   function play(name, opts) {
@@ -4580,13 +5744,95 @@ const Haptic = (() => {
    Stars and clouds are separate layers, so only the compositor animates them. */
 
 const Scene = (() => {
-  const STOPS = [
-    { p: 0, bands: ['#0B0E27', '#0E112E', '#111535', '#14183C', '#171C44', '#1B204C', '#1F2455', '#23285E'], sun: '#2B2F6C', far: '#161A4A', mid: '#10133A', near: '#0B0D24' },
-    { p: 0.25, bands: ['#12133A', '#191749', '#231C59', '#2F2168', '#3E2775', '#522E7F', '#6A3585', '#853C86'], sun: '#FF8A5F', far: '#2C1F60', mid: '#1A174A', near: '#0C0E28' },
-    { p: 0.5, bands: ['#2A1B5E', '#43236F', '#60297B', '#802F7F', '#A0387C', '#C04674', '#DC5868', '#F0705B'], sun: '#FFC76E', far: '#5B2771', mid: '#301C56', near: '#100F2C' },
-    { p: 0.75, bands: ['#6B2A7A', '#93347C', '#B84076', '#D6506A', '#EA655B', '#F5804E', '#FA9C47', '#FDB94A'], sun: '#FFE28C', far: '#A33C6E', mid: '#5C2361', near: '#15102E' },
-    { p: 1, bands: ['#E8503F', '#F0663B', '#F67E38', '#FA9537', '#FDAD3A', '#FEC447', '#FFD762', '#FFE685'], sun: '#FFF7CC', far: '#C8463F', mid: '#7A2A56', near: '#1A1130' },
-  ];
+  /* ------------------------------------------------------------- Colors */
+  const hex2rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const mix = (a, b, t) => {
+    const x = hex2rgb(a);
+    const y = hex2rgb(b);
+    return `#${[0, 1, 2].map((i) => Math.round(lerp(x[i], y[i], t)).toString(16).padStart(2, '0')).join('')}`;
+  };
+  /** Eight sky bands, from the far edge to the ring around the sun, spread along a few anchor colours. */
+  const ramp = (anchors) =>
+    Array.from({ length: 8 }, (_, i) => {
+      const x = (i / 7) * (anchors.length - 1);
+      const k = Math.min(Math.floor(x), anchors.length - 2);
+      return mix(anchors[k], anchors[k + 1], x - k);
+    });
+  const stop = (p, anchors, sun, far, mid, near) => ({ p, bands: ramp(anchors), sun, far, mid, near });
+
+  /* Every sky tells the same story (night first, full light when the day is done)
+     in its own colours. `level` is the overall level that unlocks it; `ink` is the
+     title colour once the sky gets bright (null: the sky stays dark enough for cream). */
+  const THEMES = {
+    abendrot: {
+      name: 'Abendrot',
+      note: 'Von Nachtblau über Koralle zu Gold',
+      level: 1,
+      ink: '#2A0F2E',
+      stops: [
+        { p: 0, bands: ['#0B0E27', '#0E112E', '#111535', '#14183C', '#171C44', '#1B204C', '#1F2455', '#23285E'], sun: '#2B2F6C', far: '#161A4A', mid: '#10133A', near: '#0B0D24' },
+        { p: 0.25, bands: ['#12133A', '#191749', '#231C59', '#2F2168', '#3E2775', '#522E7F', '#6A3585', '#853C86'], sun: '#FF8A5F', far: '#2C1F60', mid: '#1A174A', near: '#0C0E28' },
+        { p: 0.5, bands: ['#2A1B5E', '#43236F', '#60297B', '#802F7F', '#A0387C', '#C04674', '#DC5868', '#F0705B'], sun: '#FFC76E', far: '#5B2771', mid: '#301C56', near: '#100F2C' },
+        { p: 0.75, bands: ['#6B2A7A', '#93347C', '#B84076', '#D6506A', '#EA655B', '#F5804E', '#FA9C47', '#FDB94A'], sun: '#FFE28C', far: '#A33C6E', mid: '#5C2361', near: '#15102E' },
+        { p: 1, bands: ['#E8503F', '#F0663B', '#F67E38', '#FA9537', '#FDAD3A', '#FEC447', '#FFD762', '#FFE685'], sun: '#FFF7CC', far: '#C8463F', mid: '#7A2A56', near: '#1A1130' },
+      ],
+    },
+    polarlicht: {
+      name: 'Polarlicht',
+      note: 'Grünes Leuchten über dem Fjord',
+      level: 2,
+      ink: '#06262E',
+      stops: [
+        stop(0, ['#070B1E', '#12203F'], '#1F3A5C', '#0F1D3A', '#0B1530', '#080F22'),
+        stop(0.25, ['#081226', '#0E2A45', '#135A5E'], '#5FE3A1', '#12354B', '#0D2238', '#081226'),
+        stop(0.5, ['#0B1B3A', '#12506A', '#1FA587'], '#A6F5C0', '#15506A', '#0E2F4C', '#0A162C'),
+        stop(0.75, ['#123A6B', '#1B8E94', '#52D99A'], '#D9FFCB', '#1C7C86', '#12476A', '#0B1930'),
+        stop(1, ['#1FA8A0', '#55DE9E', '#C8F78A'], '#FBFFD9', '#1E8F8C', '#14566F', '#0C1C34'),
+      ],
+    },
+    lagune: {
+      name: 'Lagune',
+      note: 'Tiefblau bis türkis, wie ein Sommertag am Meer',
+      level: 4,
+      ink: '#08173F',
+      stops: [
+        stop(0, ['#060A20', '#0F1A45'], '#22326F', '#111C4A', '#0C143A', '#080D26'),
+        stop(0.25, ['#0A1238', '#16307A', '#2B5BB5'], '#7CC8FF', '#1A2E72', '#111D52', '#090F2C'),
+        stop(0.5, ['#0F2466', '#1E5BC0', '#33A7E0'], '#BDEBFF', '#1E55A8', '#132F74', '#0A1232'),
+        stop(0.75, ['#1949B0', '#2D9BE6', '#62DCEB'], '#E6FBFF', '#2581C4', '#164A8E', '#0B1638'),
+        stop(1, ['#2F8FEA', '#5CD6F0', '#B8F5E4', '#FFF1B8'], '#FFFDE8', '#2E9FCC', '#1B5E9A', '#0C193E'),
+      ],
+    },
+    kirschbluete: {
+      name: 'Kirschblüte',
+      note: 'Pflaume, Pink und ganz viel Rosa',
+      level: 6,
+      ink: '#3B0F38',
+      stops: [
+        stop(0, ['#120A22', '#24123F'], '#3D2060', '#22123E', '#190D30', '#110920'),
+        stop(0.25, ['#1C0E38', '#431B5C', '#7A2B74'], '#FF8FC0', '#3C1A58', '#27113F', '#130A24'),
+        stop(0.5, ['#33165A', '#82307F', '#D0528F'], '#FFC2DC', '#6E2A76', '#40195A', '#150B28'),
+        stop(0.75, ['#6C2A86', '#C9529A', '#F58FB0'], '#FFE1EC', '#A8448C', '#5E2370', '#180C2C'),
+        stop(1, ['#E86AA6', '#F9A3BC', '#FFD9D2'], '#FFF8F0', '#C9578F', '#7A2F78', '#1C0E30'),
+      ],
+    },
+    neon: {
+      name: 'Neon',
+      note: 'Synthwave: Violett, Magenta, Laserlicht',
+      level: 9,
+      ink: null,
+      stops: [
+        stop(0, ['#07051A', '#150B3A'], '#2A1670', '#160C40', '#0F082E', '#09051C'),
+        stop(0.25, ['#0D0730', '#2A0F6E', '#5A18A8'], '#FF4FD8', '#27106A', '#180A48', '#0B0622'),
+        stop(0.5, ['#1A0A5C', '#5A1BC0', '#B02BE0'], '#FF8AE8', '#4A16A0', '#260D68', '#0D0726'),
+        stop(0.75, ['#3B14B8', '#9B2DEB', '#F04FD6'], '#FFC4F4', '#7C22C4', '#3C1284', '#0F082A'),
+        stop(1, ['#5A2BEA', '#B845F5', '#FF6AD5', '#FFB86B'], '#FFF3C4', '#8B2BD4', '#4A1796', '#110930'),
+      ],
+    },
+  };
+  const THEME_IDS = Object.keys(THEMES);
+  let theme = 'abendrot';
+  let STOPS = THEMES[theme].stops;
   const BAND_SIZES = [11, 8.2, 6.1, 4.5, 3.3, 2.4, 1.65];
   const SLIM_DROP = 90; // how much shorter the sky is outside the "Heute" tab on phones
 
@@ -4602,19 +5848,14 @@ const Scene = (() => {
   let sunY = 0;
   let halo, sunEl, bandEls, farEl, midEl, nearEl, treesEl;
   let finaleTimer = 0;
+  let glimpse = null; // a progress value shown for a moment instead of the real one
+  let glimpseTimer = 0;
 
-  /* ------------------------------------------------------------- Colors */
-  const hex2rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-  const mix = (a, b, t) => {
-    const x = hex2rgb(a);
-    const y = hex2rgb(b);
-    return `#${[0, 1, 2].map((i) => Math.round(lerp(x[i], y[i], t)).toString(16).padStart(2, '0')).join('')}`;
-  };
-  function colorsAt(p) {
+  function colorsAt(p, stops = STOPS) {
     let i = 0;
-    while (i < STOPS.length - 2 && p > STOPS[i + 1].p) i++;
-    const a = STOPS[i];
-    const b = STOPS[i + 1];
+    while (i < stops.length - 2 && p > stops[i + 1].p) i++;
+    const a = stops[i];
+    const b = stops[i + 1];
     const t = clamp((p - a.p) / (b.p - a.p), 0, 1);
     return {
       bands: a.bands.map((c, n) => mix(c, b.bands[n], t)),
@@ -4752,7 +5993,7 @@ const Scene = (() => {
 
   function apply() {
     if (!W || !halo) return;
-    const p = progress;
+    const p = glimpse == null ? progress : glimpse;
     const c = colorsAt(p);
     bandEls.forEach((el, i) => {
       el.style.fill = c.bands[i];
@@ -4777,15 +6018,20 @@ const Scene = (() => {
     cloudsEl.style.fill = mix(c.bands[3], '#FFF4E0', 0.28);
 
     const rootStyle = document.documentElement.style;
+    const ink = p >= 0.82 ? THEMES[theme].ink : null;
     rootStyle.setProperty('--ground', c.near);
-    rootStyle.setProperty('--hero-fg', p >= 0.82 ? '#2A0F2E' : '#FFF4E0');
-    rootStyle.setProperty('--hero-shadow', p >= 0.82 ? 'rgba(255, 240, 200, 0.28)' : 'rgba(30, 10, 50, 0.38)');
+    rootStyle.setProperty('--hero-fg', ink || '#FFF4E0');
+    rootStyle.setProperty('--hero-shadow', ink ? 'rgba(255, 240, 200, 0.28)' : 'rgba(30, 10, 50, 0.38)');
     const meta = $('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', c.bands[0]);
   }
 
   /* ---------------------------------------------------------------- API */
   function mount(el) {
+    if (THEMES[L.sky]) {
+      theme = L.sky;
+      STOPS = THEMES[theme].stops;
+    }
     root = el;
     wrap = $('.sky-wrap', el);
     skyEl = $('.sky', el);
@@ -4811,6 +6057,29 @@ const Scene = (() => {
     slim = isSlim;
     if (changed) apply();
   }
+
+  /** Switches the sky. With `show`, the finished day is shown for a moment, so you see what you picked. */
+  function setTheme(id, show) {
+    if (!THEMES[id]) return;
+    theme = id;
+    STOPS = THEMES[id].stops;
+    clearTimeout(glimpseTimer);
+    glimpse = show && motionOK() ? 1 : null;
+    apply();
+    if (glimpse != null) {
+      glimpseTimer = setTimeout(() => {
+        glimpse = null;
+        apply();
+      }, 2300);
+    }
+  }
+
+  /** The skies in unlock order, each with the colours of a late afternoon for a small preview. */
+  const themes = () =>
+    THEME_IDS.map((id) => {
+      const t = THEMES[id];
+      return { id, name: t.name, note: t.note, level: t.level, active: id === theme, colors: colorsAt(0.8, t.stops) };
+    });
 
   function pulse() {
     if (!sunEl || !motionOK()) return;
@@ -4846,7 +6115,7 @@ const Scene = (() => {
     finaleTimer = setTimeout(() => root.classList.remove('finale'), 4200);
   }
 
-  return { mount, set, pulse, sunPoint, finale, SLIM_DROP };
+  return { mount, set, setTheme, themes, pulse, sunPoint, finale, SLIM_DROP };
 })();
 
 function motionOK() {
@@ -5091,7 +6360,7 @@ const Hud = (() => {
 const LevelUp = (() => {
   const queue = [];
   let open = false;
-  let afterQueue = null;
+  let waiting = [];
 
   function next() {
     const item = queue.shift();
@@ -5099,15 +6368,13 @@ const LevelUp = (() => {
     if (!item) {
       open = false;
       host.innerHTML = '';
-      if (afterQueue) {
-        const fn = afterQueue;
-        afterQueue = null;
-        setTimeout(fn, 260);
-      }
+      const fns = waiting;
+      waiting = [];
+      fns.forEach((fn) => setTimeout(fn, 260));
       return;
     }
     open = true;
-    const { name, emoji, color, from, to, rankBefore, rank } = item;
+    const { name, emoji, color, from, to, rankBefore, rank, extra } = item;
     host.innerHTML = `
       <div class="lvl" style="--c:${esc(color)}" data-act="close-level" role="dialog" aria-label="Level ${to} erreicht">
         <div class="lvl-bands" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -5117,6 +6384,7 @@ const LevelUp = (() => {
           <div class="lvl-num" aria-hidden="true"><span class="old">${from}</span><span class="new">${to}</span></div>
           <p class="lvl-title">Level ${to}!</p>
           <p class="lvl-rank">${rank !== rankBefore ? `Neuer Rang: ${esc(rank)}` : esc(rank)}</p>
+          ${extra ? `<p class="lvl-extra">${esc(extra)}</p>` : ''}
         </div>
         <button class="btn lvl-btn" data-act="close-level">Weiter</button>
       </div>`;
@@ -5142,12 +6410,71 @@ const LevelUp = (() => {
   /** Runs fn once all level-up screens are gone (they start after `delay`). */
   function afterAll(fn, delay = 0) {
     setTimeout(() => {
-      if (open || queue.length) afterQueue = fn;
+      if (open || queue.length) waiting.push(fn);
       else fn();
     }, delay + 20);
   }
 
   return { push, close, afterAll, get open() { return open; } };
+})();
+
+/* ========================================================= Erfolg-Banner
+   A freshly earned badge drops in from the top, one at a time. */
+const BadgeBanner = (() => {
+  const queue = [];
+  let showing = false;
+  let timer = 0;
+  let host;
+
+  const medalHtml = (b, cls = '') =>
+    `<span class="medal ${cls}" style="--c:${esc(b.color)}" aria-hidden="true"><i>${esc(b.emoji)}</i></span>`;
+
+  function next() {
+    host = host || $('#badgeRoot');
+    const b = queue.shift();
+    if (!b) {
+      showing = false;
+      return;
+    }
+    showing = true;
+    host.innerHTML = `
+      <button class="bdg-pop" style="--c:${esc(b.color)}" data-act="badges" data-id="${esc(b.id)}" data-fx="none">
+        <span class="bdg-pop-shine" aria-hidden="true"></span>
+        ${medalHtml(b, 'on')}
+        <span class="bdg-pop-text">
+          <small>Erfolg freigeschaltet</small>
+          <b>${esc(b.name)}</b>
+          <span>${esc(b.desc)}</span>
+        </span>
+      </button>`;
+    Sound.play('badge');
+    Haptic('success');
+    setTimeout(() => {
+      const m = $('.medal', host);
+      if (!m) return;
+      const r = m.getBoundingClientRect();
+      Fx.burst(r.left + r.width / 2, r.top + r.height / 2, b.color, 20, 1.5);
+    }, 330);
+    timer = setTimeout(hide, 3800);
+  }
+
+  function hide() {
+    clearTimeout(timer);
+    const el = host && host.firstElementChild;
+    if (!el) return next();
+    el.classList.add('out');
+    setTimeout(() => {
+      host.innerHTML = '';
+      next();
+    }, 240);
+  }
+
+  function push(list) {
+    queue.push(...list);
+    if (!showing) next();
+  }
+
+  return { push, hide, medalHtml };
 })();
 
 /* Number roll-up for counters in the sky. */
@@ -5261,6 +6588,8 @@ function playFlip(map) {
   if (!motionOK()) return;
   for (const [el, top] of map) {
     if (!el.isConnected) continue;
+    // Moving a node restarts its entry animation: a row that only changes places must not fade in again.
+    for (const a of el.getAnimations()) if (a.animationName === 'rowIn') a.finish();
     const dy = top - el.getBoundingClientRect().top;
     if (Math.abs(dy) < 1) continue;
     el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], {
@@ -5457,7 +6786,7 @@ function taskRow(task, date, done, opts = {}) {
     if (n >= 2) meta.push(`<span class="m hot">${I.flame}${n}×</span>`);
   }
   const attrs = `data-id="${task.id}" data-date="${date}"`;
-  return `<div class="row-wrap" data-k="${task.id}|${date}" data-flip style="--i:${opts.i || 0}">
+  return `<div class="row-wrap" data-k="${task.id}|${date}" data-flip ${opts.drag ? 'data-drag' : ''} style="--i:${opts.i || 0}">
     <div class="row-under" aria-hidden="true">
       <span class="u u-done">${I.check}Erledigt</span>
       <span class="u u-move">Morgen${I.arrow}</span>
@@ -5548,7 +6877,7 @@ function viewToday() {
       <p>Leg eine Aufgabe an oder nimm eine aus deinen Vorlagen. Jede erledigte Aufgabe hebt die Sonne ein Stück höher.</p>
     </div>`);
   }
-  open.forEach(({ task }) => parts.push(taskRow(task, date, false, { i: i++ })));
+  open.forEach(({ task }) => parts.push(taskRow(task, date, false, { i: i++, drag: open.length > 1 })));
   parts.push(
     `<button class="add-row" data-k="add-row" data-act="add" data-flip>${I.plus}Aufgabe für ${esc(label === 'Heute' || label === 'Morgen' || label === 'Übermorgen' ? label.toLowerCase() : label)}</button>`,
   );
@@ -5845,13 +7174,252 @@ function viewLevels() {
         <div><dt>Erledigt</dt><dd>${d.taskCount + d.goalCount}</dd></div>
       </dl>
     </section>
-    ${groupHead('h-heat', 'Deine letzten Wochen')}
-    ${heatmap()}
+    ${badgeSection()}
+    ${weekReview()}
     ${groupHead('h-cats', 'Kategorien', `<button class="gh-btn" data-act="new-cat">${I.plus}Neu</button>`)}
     <div class="cat-list" data-k="cat-list">
       ${cats.map(catCard).join('') || `<div class="empty small" data-k="e-cats"><p>Lege Kategorien an wie „Schule“ oder „Sport“. In jeder levelst du getrennt auf.</p></div>`}
     </div>
+    ${skySection()}
+    ${groupHead('h-heat', 'Deine letzten Wochen')}
+    ${heatmap()}
   </div>`;
+}
+
+/* ================================================================= INSIGHTS
+   The extra sections of the Level tab: Erfolge, Wochenrückblick and Himmel. */
+
+const num = (n) => Number(n).toLocaleString('de-DE');
+const LOCK = ic('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>');
+
+/* ------------------------------------------------------------------ Erfolge */
+function medalHtml(b, size = 56) {
+  return `<span class="medal ${b.done ? 'on' : 'off'}" style="--c:${b.color};--s:${size}px;--p:${Math.round(b.pct * 100)}" aria-hidden="true"><i>${esc(b.emoji)}</i></span>`;
+}
+
+const badgeProgress = (b) => (b.goal === 1 ? 'Noch offen' : `${num(b.cur)} von ${num(b.goal)}`);
+
+function badgeSection() {
+  const all = badgeList();
+  const got = all.filter((b) => b.done);
+  // Newest first. What was earned before this device kept track follows, highest tier first.
+  const recent = [...got]
+    .reverse()
+    .sort((a, b) => (a.on < b.on ? 1 : a.on > b.on ? -1 : 0))
+    .slice(0, 4);
+  const next = badgesNextUp(3);
+  const stack = recent.length
+    ? recent.map((b, i) => `<span class="bdg-stack-i" style="z-index:${4 - i}">${medalHtml(b, 40)}</span>`).join('')
+    : `<span class="bdg-stack-i">${medalHtml({ ...all[0], done: false, pct: 0 }, 40)}</span>`;
+  const tile = (b) => `<button class="bdg-tile" data-act="badges" data-id="${b.id}" style="--c:${b.color}" aria-label="${esc(`${b.name}. ${b.desc} ${badgeProgress(b)}.`)}">
+      ${medalHtml(b, 48)}
+      <b>${esc(b.name)}</b>
+      <span class="bar"><i style="width:${(b.pct * 100).toFixed(1)}%"></i></span>
+      <small>${badgeProgress(b)}</small>
+    </button>`;
+  return `${groupHead('h-bdg', 'Erfolge')}
+    <section class="bdg" data-k="bdg">
+      <button class="bdg-sum" data-act="badges">
+        <span class="bdg-stack">${stack}</span>
+        <span class="bdg-sum-t"><b>${got.length} von ${all.length}</b><span>${got.length ? 'freigeschaltet' : 'Dein erster Erfolg wartet schon'}</span></span>
+        ${I.right}
+      </button>
+      ${
+        next.length
+          ? `<p class="bdg-next-h">Als Nächstes dran</p><div class="bdg-next">${next.map(tile).join('')}</div>`
+          : `<p class="bdg-next-h">Alle Erfolge geholt. Respekt.</p>`
+      }
+    </section>`;
+}
+
+/** The gallery sheet: one badge in detail on top, all of them below. */
+function badgesBody(sh) {
+  const all = badgeList();
+  const sel = all.find((b) => b.id === sh.sel) || badgesNextUp(1)[0] || all[0];
+  const state = sel.done
+    ? `<span class="bdg-state ok">${I.check}${sel.on ? `Freigeschaltet am ${esc(fmtDay(sel.on))}` : 'Freigeschaltet'}</span>`
+    : `<span class="bar"><i style="width:${(sel.pct * 100).toFixed(1)}%"></i></span><span class="bdg-state">${badgeProgress(sel)}</span>`;
+  const detail = `<div class="bdg-detail" data-k="bdg-detail" style="--c:${sel.color}" aria-live="polite">
+      ${medalHtml(sel, 76)}
+      <div class="bdg-detail-t"><b>${esc(sel.name)}</b><span>${esc(sel.desc)}</span>${state}</div>
+    </div>`;
+  const cell = (b) => `<button class="bdg-cell ${b.id === sel.id ? 'sel' : ''} ${b.done ? 'done' : ''}" data-act="badge" data-fx="tab" data-id="${b.id}" style="--c:${b.color}"
+        aria-pressed="${b.id === sel.id}" aria-label="${esc(`${b.name}, ${b.done ? 'freigeschaltet' : badgeProgress(b)}`)}">
+      ${medalHtml(b, 54)}
+      <span>${esc(b.name)}</span>
+    </button>`;
+  const groups = BADGE_GROUPS.map((g) => {
+    const list = all.filter((b) => b.group === g.id);
+    return `<section class="bdg-group" data-k="g-${g.id}">
+        <h3>${esc(g.name)}<small>${list.filter((b) => b.done).length} / ${list.length}</small></h3>
+        <div class="bdg-grid">${list.map(cell).join('')}</div>
+      </section>`;
+  }).join('');
+  return detail + groups;
+}
+
+/* ---------------------------------------------------------- Wochenrückblick */
+function weekData(mon, today = todayStr()) {
+  const d = derived();
+  const end = addDays(mon, 6);
+  const days = [];
+  const cats = {};
+  const addCat = (id, xp) => {
+    const key = id && getCat(id) ? id : '';
+    cats[key] = (cats[key] || 0) + xp;
+  };
+  let xp = 0;
+  let n = 0;
+  let perfect = 0;
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(mon, i);
+    const entries = d.byDate[date] || [];
+    const v = d.xpDay[date] || 0;
+    for (const e of entries) addCat(e.catId, e.xp);
+    if (date <= today) {
+      const st = dayStat(date);
+      if (st.total > 0 && st.done === st.total) perfect++;
+    }
+    days.push({ date, xp: v, n: entries.length, future: date > today, today: date === today });
+    xp += v;
+    n += entries.length;
+  }
+  let goals = 0;
+  for (const g of live('goals')) {
+    if (!g.doneAt || !g.doneOn || g.doneOn < mon || g.doneOn > end) continue;
+    goals++;
+    addCat(g.catId, g.xp || 0);
+  }
+  return { days, cats, xp, n, goals, perfect };
+}
+
+function weekReview() {
+  const t = todayStr();
+  const d = derived();
+  const cur = weekStart(t);
+  const firstDate = Object.keys(d.xpDay).sort()[0];
+  const minWeek = firstDate ? weekStart(firstDate) : cur;
+  const mon = ui.insWeek && ui.insWeek <= cur ? ui.insWeek : cur;
+  const isCur = mon === cur;
+  const w = weekData(mon, t);
+  const title = isCur ? 'Diese Woche' : mon === addDays(cur, -7) ? 'Letzte Woche' : `Kalenderwoche ${isoWeek(mon)}`;
+
+  /* Compared with the same stretch of the week before. */
+  const span = isCur ? weekdayOf(t) : 7;
+  let prev = 0;
+  for (let i = 0; i < span; i++) prev += d.xpDay[addDays(mon, i - 7)] || 0;
+  const diff = w.xp - prev;
+  const upTo = isCur && span < 7 ? ` bis ${WD_LONG[span]}` : '';
+  let delta = '';
+  if (!w.xp && (isCur || !prev)) {
+    delta = `<p class="wkc-delta">${isCur ? 'Neue Woche, alles offen. Der erste Haken zählt.' : 'Eine ruhige Woche.'}</p>`;
+  } else if (!diff) {
+    delta = `<p class="wkc-delta">Gleichauf mit der Vorwoche${upTo}</p>`;
+  } else {
+    delta = `<p class="wkc-delta ${diff > 0 ? 'up' : 'down'}"><i aria-hidden="true">${diff > 0 ? '▲' : '▼'}</i>${num(Math.abs(diff))} XP ${diff > 0 ? 'mehr' : 'weniger'} als ${isCur ? 'letzte Woche' : 'in der Woche davor'}${upTo}</p>`;
+  }
+
+  /* One hue, seven bars. Behind each one, pale and wider, the same weekday of the week before.
+     Only the best day carries its number; the rest is in the tip line. */
+  const before = w.days.map((x) => d.xpDay[addDays(x.date, -7)] || 0);
+  const hasBefore = before.some((v) => v > 0);
+  const max = Math.max(1, ...w.days.map((x) => x.xp), ...before);
+  const best = w.days.reduce((a, b) => (b.xp > a.xp ? b : a), w.days[0]);
+  const PLOT = 92;
+  const px = (v) => (v ? Math.max(5, Math.round((v / max) * PLOT)) : 0);
+  const labelOf = (x, i) => {
+    const was = before[i] ? ` · Vorwoche ${num(before[i])} XP` : '';
+    return x.future
+      ? `${fmtWdShort(x.date)}: liegt noch vor dir${was}`
+      : `${fmtWdShort(x.date)}: ${num(x.xp)} XP${x.n ? `, ${plural(x.n, 'Aufgabe', 'Aufgaben')}` : ''}${was}`;
+  };
+  const selAt = w.days.findIndex((x) => x.date === ui.insDay);
+  const sel = w.days[selAt];
+  const rest = sel ? labelOf(sel, selAt) : hasBefore ? 'Blass dahinter: die Woche davor' : 'Tippe auf einen Balken für die Zahlen';
+  const bars = w.days
+    .map((x, i) => {
+      const label = labelOf(x, i);
+      return `<button class="wkc-col ${x.today ? 'now' : ''} ${x.future ? 'future' : ''} ${x.xp ? '' : 'zero'} ${x === sel ? 'sel' : ''}" data-act="ins-day" data-fx="none" data-date="${x.date}" data-tip="${esc(label)}" aria-pressed="${x === sel}" aria-label="${esc(label)}">
+          <span class="wkc-plot"><u style="height:${px(before[i])}px"></u>${x === best && x.xp ? `<em>${num(x.xp)}</em>` : ''}<i style="height:${px(x.xp)}px"></i></span>
+          <span class="wkc-wd">${WD_SHORT[weekdayOf(x.date)]}</span>
+        </button>`;
+    })
+    .join('');
+
+  const bestWd = best.xp ? WD_SHORT[weekdayOf(best.date)] : '–';
+  const facts = `<dl class="stats three">
+      <div><dt>Erledigt</dt><dd>${w.n + w.goals}</dd></div>
+      <div><dt>Bester Tag</dt><dd>${bestWd}${best.xp ? `<small> ${num(best.xp)} XP</small>` : ''}</dd></div>
+      <div><dt>Perfekte Tage</dt><dd>${w.perfect}<small> von ${span}</small></dd></div>
+    </dl>`;
+
+  /* Where the XP came from: labelled rows, the colour only repeats the label. */
+  let rows = Object.entries(w.cats)
+    .filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1]);
+  if (rows.length > 6) {
+    const rest = rows.slice(5).reduce((sum, [, v]) => sum + v, 0);
+    rows = [...rows.slice(0, 5), ['+', rest]];
+  }
+  const catMax = rows.length ? Math.max(...rows.map(([, v]) => v)) : 1;
+  const catRows = rows
+    .map(([id, v]) => {
+      const c = getCat(id);
+      const name = c ? `${esc(c.emoji)} ${esc(c.name)}` : id === '+' ? 'Weitere' : 'Ohne Kategorie';
+      return `<li style="--c:${c ? c.color : '#9C99B7'}"><span class="wkc-cat">${name}</span><span class="bar"><i style="width:${((v / catMax) * 100).toFixed(1)}%"></i></span><b>${num(v)}</b></li>`;
+    })
+    .join('');
+
+  return `${groupHead('h-week', 'Wochenrückblick')}
+    <section class="wkc" data-k="wkc" aria-label="Wochenrückblick, ${esc(title)}">
+      <div class="period">
+        <button class="icon-btn" data-act="ins-week" data-dir="-1" aria-label="Woche davor" ${mon <= minWeek ? 'disabled' : ''}>${I.left}</button>
+        <div class="period-t"><b>${esc(title)}</b><span>${esc(fmtWeekRange(mon))}</span></div>
+        <button class="icon-btn" data-act="ins-week" data-dir="1" aria-label="Woche danach" ${isCur ? 'disabled' : ''}>${I.right}</button>
+      </div>
+      <div class="wkc-hero">
+        <p class="wkc-xp"><b>${num(w.xp)}</b><small>XP</small></p>
+        ${delta}
+      </div>
+      <div class="wkc-chart" role="group" aria-label="XP pro Tag">${bars}</div>
+      <p class="wkc-tip" id="insTip" data-rest="${esc(rest)}">${esc(rest)}</p>
+      ${facts}
+      ${catRows ? `<ul class="wkc-cats" aria-label="XP nach Kategorie">${catRows}</ul>` : ''}
+    </section>`;
+}
+
+/* ------------------------------------------------------------------- Himmel */
+function skyPreview(c) {
+  const R = 7;
+  const cx = 87;
+  const cy = 43;
+  const rings = [11, 8.2, 6.1, 4.5, 3.3, 2.4, 1.65]
+    .map((k, i) => `<circle cx="${cx}" cy="${cy}" r="${(R * k).toFixed(1)}" fill="${c.bands[i + 1]}"/>`)
+    .join('');
+  return `<svg class="sky-pic" viewBox="0 0 120 78" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="120" height="78" fill="${c.bands[0]}"/>${rings}
+      <circle cx="${cx}" cy="${cy}" r="${R}" fill="${c.sun}"/>
+      <path d="M0 57c16-7 30-6 46-1s34 5 50-2 18-4 24-2v26H0z" fill="${c.far}"/>
+      <path d="M0 65c20-6 36 2 56-1s40-9 64-2v16H0z" fill="${c.mid}"/>
+      <path d="M0 72c24-5 44 3 68 0s36-4 52-1v7H0z" fill="${c.near}"/>
+    </svg>`;
+}
+
+function skySection() {
+  const level = totalLevel(derived().xpTotal).level;
+  const cards = Scene.themes()
+    .map((t) => {
+      const open = level >= t.level;
+      const label = open ? `${t.name}${t.active ? ', ausgewählt' : ''}` : `${t.name}, gesperrt bis Level ${t.level}`;
+      const mark = !open ? `<span class="sky-mark">${LOCK}</span>` : t.active ? `<span class="sky-mark on">${I.check}</span>` : '';
+      return `<button class="sky-card ${t.active ? 'on' : ''} ${open ? '' : 'locked'}" data-k="sky-${t.id}" data-act="set-sky" data-fx="none" data-id="${t.id}" aria-pressed="${t.active}" aria-label="${esc(label)}">
+          <span class="sky-frame">${skyPreview(t.colors)}${mark}</span>
+          <span class="sky-name">${esc(t.name)}</span>
+          <span class="sky-note">${open ? esc(t.note) : `Ab Level ${t.level}`}</span>
+        </button>`;
+    })
+    .join('');
+  return `${groupHead('h-sky', 'Himmel')}<div class="sky-strip" data-k="sky-strip">${cards}</div>`;
 }
 
 /* =================================================================== SHEETS
@@ -6000,10 +7568,23 @@ function repeatEditor(d) {
 const titleInput = (id, path, value, placeholder) =>
   `<input id="${id}" class="big-input" type="text" data-bind="${path}" data-enter="submit" value="${esc(value)}" placeholder="${placeholder}" maxlength="140" autocomplete="off" enterkeyhint="done" aria-label="${placeholder}">`;
 
+/** Under the title of a new task: what was read out of it, each one to wave away, or the tip how it works. */
+function quickLine(d) {
+  const parts = d.quickParts || [];
+  const chips = parts
+    .map(
+      (p) =>
+        `<button type="button" class="qchip" data-k="q-${p.kind}" data-act="quick-off" data-fx="none" data-key="${esc(p.key)}" title="Nicht übernehmen" aria-label="${esc(p.label)}, erkannt. Tippen, um es nicht zu übernehmen.">${esc(p.label)}${I.x}</button>`,
+    )
+    .join('');
+  return `<div class="quick" data-k="quick" aria-live="polite">${chips || `<p class="hint">Tipp: „Mathe morgen 50xp #schule“ füllt alles aus.</p>`}</div>`;
+}
+
 /* ----------------------------------------------------------------- Forms */
 function taskForm(d, isEdit) {
   return `
     ${titleInput('f-title', 'task.title', d.title, 'Was steht an?')}
+    ${isEdit ? '' : quickLine(d)}
     ${catPicker('task.catId', d.catId)}
     ${xpPicker('task.xp', d.xp, XP_TASK)}
     ${datePicker('task', d, d.repeatOn ? 'Ab wann?' : 'Wann?')}
@@ -6286,6 +7867,8 @@ function sheetContent() {
       };
     case 'settings':
       return { label: 'Einstellungen', head: `<h2>Einstellungen</h2>`, body: settingsBody(), foot: `<button class="btn ghost wide" data-act="close-sheet">Fertig</button>` };
+    case 'badges':
+      return { label: 'Erfolge', head: `<h2>Erfolge <small class="h2-count">${badgeCount()} / ${BADGES.length}</small></h2>`, body: badgesBody(sh), foot: '' };
     default:
       return { label: '', head: '', body: '', foot: '' };
   }
@@ -6323,6 +7906,225 @@ function dialogHtml() {
   </div>`;
 }
 
+/* ================================================================= SORTING
+   The open tasks of a day can be put in order by hand: hold a row for a moment
+   on the phone, or simply drag it with the mouse. The order belongs to the task,
+   so a repeating task keeps its place on its other days too. */
+
+let dragActive = false;
+
+/** Writes the new order. `ids` is the list as it should be, `movedId` the row that was carried. */
+function reorderTasks(ids, movedId) {
+  const ord = (id) => (S.tasks[id] && S.tasks[id].order) || 0;
+  const at = ids.indexOf(movedId);
+  const prev = at > 0 ? ord(ids[at - 1]) : null;
+  const next = at < ids.length - 1 ? ord(ids[at + 1]) : null;
+  const o = prev == null ? next - 1000 : next == null ? prev + 1000 : (prev + next) / 2;
+  if ((prev == null || o > prev) && (next == null || o < next)) {
+    updateTask(movedId, { order: o });
+    return;
+  }
+  // Neighbours share a value: number the whole list afresh.
+  const base = Math.min(...ids.map(ord));
+  ids.forEach((id, i) => updateTask(id, { order: base + i * 1000 }));
+}
+
+function initRowDrag() {
+  const PRESS_MS = 380;
+  let d = null; // the running drag
+  let arm = null; // a press that may still become one
+  let scrollRaf = 0;
+
+  const pressable = (e) => {
+    if (d || ui.sheet || ui.dialog) return null;
+    const wrap = e.target.closest && e.target.closest('.row-wrap[data-drag]');
+    if (!wrap || e.target.closest('.chk, .row-tools, .tool')) return null;
+    return wrap;
+  };
+
+  const disarm = () => {
+    if (arm && arm.timer) clearTimeout(arm.timer);
+    arm = null;
+  };
+
+  function begin(wrap, y, mouse) {
+    const list = wrap.parentElement;
+    const rows = $$('.row-wrap[data-drag]', list);
+    const from = rows.indexOf(wrap);
+    if (rows.length < 2 || from < 0) return false;
+    const rects = rows.map((el) => el.getBoundingClientRect());
+    const sy = window.scrollY;
+    d = {
+      wrap,
+      list,
+      rows,
+      from,
+      to: from,
+      mouse,
+      y0: y,
+      sy0: sy,
+      lastY: y,
+      tops: rects.map((r) => r.top + sy),
+      heights: rects.map((r) => r.height),
+      step: rects[from].height + (rects[1].top - rects[0].bottom),
+    };
+    dragActive = true;
+    list.classList.add('sorting');
+    wrap.classList.add('dragging');
+    root.classList.add('is-sorting');
+    Sound.play('grab');
+    Haptic('tap');
+    scrollRaf = requestAnimationFrame(autoScroll);
+    return true;
+  }
+
+  function move(y) {
+    const { rows, from, tops, heights } = d;
+    const last = rows.length - 1;
+    d.lastY = y;
+    const dy = clamp(
+      y - d.y0 + (window.scrollY - d.sy0),
+      tops[0] - tops[from] - 10,
+      tops[last] + heights[last] - tops[from] - heights[from] + 10,
+    );
+    d.wrap.style.transform = `translate3d(0,${dy.toFixed(1)}px,0) scale(1.025)`;
+
+    const centre = tops[from] + heights[from] / 2 + dy;
+    let to = 0;
+    for (let i = 0; i <= last; i++) if (i !== from && tops[i] + heights[i] / 2 < centre) to++;
+    if (to === d.to) return;
+    d.to = to;
+    Haptic('tick');
+    rows.forEach((el, i) => {
+      if (i === from) return;
+      const shift = from < to && i > from && i <= to ? -d.step : to < from && i >= to && i < from ? d.step : 0;
+      el.style.transform = shift ? `translate3d(0,${shift}px,0)` : '';
+    });
+  }
+
+  /* Near the top or bottom edge the page scrolls along. */
+  function autoScroll() {
+    if (!d) return;
+    const top = 130;
+    const bottom = window.innerHeight - 150;
+    const v = d.lastY < top ? (d.lastY - top) / 7 : d.lastY > bottom ? (d.lastY - bottom) / 7 : 0;
+    if (v) {
+      const before = window.scrollY;
+      window.scrollBy(0, clamp(v, -16, 16));
+      if (window.scrollY !== before) move(d.lastY);
+    }
+    scrollRaf = requestAnimationFrame(autoScroll);
+  }
+
+  function finish(cancel) {
+    if (!d) return;
+    const { wrap, list, rows, from } = d;
+    const to = cancel ? from : d.to;
+    cancelAnimationFrame(scrollRaf);
+    d = null;
+    dragActive = false;
+    list.classList.remove('sorting');
+    root.classList.remove('is-sorting');
+    suppressClickUntil = performance.now() + 350;
+    Sound.play('drop');
+    Haptic('tick');
+    if (to !== from) {
+      const ids = rows.map((el) => $('.row', el).dataset.id);
+      const [moved] = ids.splice(from, 1);
+      ids.splice(to, 0, moved);
+      reorderTasks(ids, moved);
+    }
+    // The render takes the rows from where they are right now and lets them glide home.
+    renderNow();
+    if (wrap.isConnected) {
+      wrap.classList.add('dropping');
+      setTimeout(() => wrap.classList.remove('dropping'), 460);
+    }
+  }
+
+  /* Touch: hold still for a moment, then carry. */
+  document.addEventListener(
+    'touchstart',
+    (e) => {
+      disarm();
+      if (e.touches.length !== 1) return;
+      const wrap = pressable(e);
+      if (!wrap) return;
+      const t = e.touches[0];
+      arm = { wrap, x: t.clientX, y: t.clientY };
+      arm.timer = setTimeout(() => {
+        const a = arm;
+        arm = null;
+        if (a && a.wrap.isConnected && !a.wrap.classList.contains('swiping')) begin(a.wrap, a.y, false);
+      }, PRESS_MS);
+    },
+    { passive: true },
+  );
+  document.addEventListener(
+    'touchmove',
+    (e) => {
+      const t = e.touches[0];
+      if (d && !d.mouse) {
+        if (e.cancelable) e.preventDefault();
+        move(t.clientY);
+      } else if (arm && !arm.mouse && Math.hypot(t.clientX - arm.x, t.clientY - arm.y) > 8) {
+        disarm();
+      }
+    },
+    { passive: false },
+  );
+  const touchEnd = (cancel) => (e) => {
+    disarm();
+    if (!d || d.mouse) return;
+    if (e.cancelable) e.preventDefault();
+    finish(cancel);
+  };
+  document.addEventListener('touchend', touchEnd(false));
+  document.addEventListener('touchcancel', touchEnd(true));
+  // A long press must not open the system menu while a row is held.
+  document.addEventListener('contextmenu', (e) => {
+    if (d || (arm && !arm.mouse)) e.preventDefault();
+  });
+
+  /* Mouse and pen: press and pull up or down. */
+  document.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch' || e.button !== 0) return;
+    const wrap = pressable(e);
+    if (wrap) arm = { wrap, x: e.clientX, y: e.clientY, mouse: true };
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'touch') return;
+    if (d && d.mouse) {
+      move(e.clientY);
+      return;
+    }
+    if (!arm || !arm.mouse) return;
+    if (arm.wrap.classList.contains('swiping')) {
+      arm = null;
+      return;
+    }
+    const dy = Math.abs(e.clientY - arm.y);
+    if (dy < 6 || dy < Math.abs(e.clientX - arm.x)) return;
+    const a = arm;
+    arm = null;
+    if (begin(a.wrap, a.y, true)) move(e.clientY);
+  });
+  const mouseEnd = (cancel) => (e) => {
+    if (e.pointerType === 'touch') return;
+    if (arm && arm.mouse) arm = null;
+    if (d && d.mouse) finish(cancel);
+  };
+  document.addEventListener('pointerup', mouseEnd(false));
+  document.addEventListener('pointercancel', mouseEnd(true));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && d) {
+      e.stopPropagation();
+      finish(true);
+    }
+  });
+  window.addEventListener('blur', () => finish(true));
+}
+
 /* ====================================================================== APP
    Global UI state, rendering, actions, gestures and start-up. */
 
@@ -6339,6 +8141,8 @@ const ui = {
   dialog: null,
   installEvent: null,
   heatTip: null,
+  insWeek: null,
+  insDay: null,
 };
 
 const root = document.documentElement;
@@ -6602,7 +8406,17 @@ function levelUpItems(res) {
     items.push({ name: cat.name, emoji: cat.emoji, color: cat.color, from: res.before.cat.level, to: res.after.cat.level, rankBefore: rankOf(res.before.cat.level), rank: rankOf(res.after.cat.level) });
   }
   if (res.after.total.level > res.before.total.level) {
-    items.push({ name: 'Gesamt-Level', emoji: '☀️', color: '#FFC145', from: res.before.total.level, to: res.after.total.level, rankBefore: rankOf(res.before.total.level), rank: rankOf(res.after.total.level) });
+    const sky = Scene.themes().filter((t) => t.level > res.before.total.level && t.level <= res.after.total.level).pop();
+    items.push({
+      name: 'Gesamt-Level',
+      emoji: '☀️',
+      color: '#FFC145',
+      from: res.before.total.level,
+      to: res.after.total.level,
+      rankBefore: rankOf(res.before.total.level),
+      rank: rankOf(res.after.total.level),
+      extra: sky ? `Neuer Himmel freigeschaltet: ${sky.name}` : '',
+    });
   }
   return items;
 }
@@ -6612,6 +8426,13 @@ function finaleNow() {
   Sound.play('alldone');
   Haptic('heavy');
   Fx.confetti(150);
+}
+
+/** Freshly earned badges drop in once the level-up screens (and the day's finale) are through. */
+function celebrateBadges(delay, afterFinale) {
+  const fresh = badgesCollect();
+  if (!fresh.length) return;
+  LevelUp.afterAll(() => setTimeout(() => BadgeBanner.push(fresh), afterFinale ? 1900 : 0), delay);
 }
 
 /* ------------------------------------------------------------ Task actions */
@@ -6644,6 +8465,7 @@ function toggleTask(id, date, chk) {
   } else if (clean) {
     setTimeout(finaleNow, 820);
   }
+  celebrateBadges(1300, clean);
 }
 
 function rowElement(id, date) {
@@ -6771,13 +8593,15 @@ function finishGoal(id, el) {
   setTimeout(renderNow, 520);
   const levels = levelUpItems(res);
   if (levels.length) setTimeout(() => levels.forEach(LevelUp.push), 1350);
+  celebrateBadges(1400, false);
 }
 
 /* --------------------------------------------------------- Form submission */
 function submitTask() {
   const sh = ui.sheet;
   const d = sh.task;
-  const title = (d.title || '').trim();
+  // In a new task the words of the quick entry ("morgen", "50xp") are in the form by now and leave the title.
+  const title = sh.kind === 'add' ? applyQuick(d).title : (d.title || '').trim();
   if (!title) return shake('#f-title');
   if (d.repeatOn && !d.days.length) return shake('#wdPick');
   const xp = cleanXp(d.xp);
@@ -6799,6 +8623,14 @@ function submitTask() {
         actionLabel: 'Anzeigen',
         action: () => goToDay(first),
       });
+    } else if (!L.sortHint) {
+      // Sorting has no button, so it is said once, the first time there is something to sort.
+      const st = dayStat(ui.date);
+      if (st.total - st.done >= 2) {
+        L.sortHint = true;
+        saveLocal();
+        toast('Tipp: Aufgabe gedrückt halten und ziehen, dann sortierst du sie.', { ms: 7000 });
+      }
     }
     renderNow();
     return;
@@ -7057,6 +8889,7 @@ const A = {
           kind: 'danger',
           fn: () => {
             removeDemo();
+            badgesPrune();
             Sound.play('remove');
             if (ui.sheet) closeSheet();
             renderNow();
@@ -7268,6 +9101,15 @@ const A = {
     Haptic('tick');
     renderSheet();
   },
+  'quick-off': (el) => {
+    const d = ui.sheet && ui.sheet.task;
+    if (!d) return;
+    (d.quickOff || (d.quickOff = {}))[el.dataset.key] = true;
+    applyQuick(d);
+    Sound.play('close');
+    Haptic('tick');
+    renderSheet();
+  },
   flip: (el) => {
     const path = el.dataset.path;
     if (path.startsWith('L.')) {
@@ -7384,6 +9226,49 @@ const A = {
   },
   'close-level': () => LevelUp.close(),
 
+  /* Erfolge, Himmel, Wochenrückblick */
+  badges: (el) => {
+    BadgeBanner.hide();
+    openSheet({ kind: 'badges', sel: el.dataset.id || '' });
+  },
+  badge: (el) => {
+    ui.sheet.sel = el.dataset.id;
+    renderSheet();
+  },
+  'set-sky': (el) => {
+    const t = Scene.themes().find((x) => x.id === el.dataset.id);
+    if (!t) return;
+    if (totalLevel(derived().xpTotal).level < t.level) {
+      shake(el);
+      toast(`„${t.name}“ gibt es ab Gesamt-Level ${t.level}.`);
+      return;
+    }
+    if (t.active) {
+      Sound.play('tap');
+      Scene.setTheme(t.id, true);
+      return;
+    }
+    L.sky = t.id;
+    saveLocal();
+    Scene.setTheme(t.id, true);
+    Sound.play('sky');
+    Haptic('success');
+    renderNow();
+  },
+  'ins-week': (el) => {
+    const cur = weekStart(todayStr());
+    const next = addDays(ui.insWeek || cur, Number(el.dataset.dir) * 7);
+    if (next > cur) return;
+    ui.insWeek = next;
+    ui.insDay = null;
+    renderNow();
+  },
+  'ins-day': (el) => {
+    ui.insDay = ui.insDay === el.dataset.date ? null : el.dataset.date;
+    Sound.play('tap');
+    renderNow();
+  },
+
   'submit-task': submitTask,
   'submit-rem': submitRem,
   'submit-goal': submitGoal,
@@ -7402,6 +9287,7 @@ const A = {
           kind: 'danger',
           fn: () => {
             wipeAll();
+            badgesPrune();
             Sound.play('remove');
             closeSheet();
             renderNow();
@@ -7448,6 +9334,11 @@ let suppressClickUntil = 0;
 function bindEvents() {
   document.addEventListener('pointerdown', () => Sound.unlock(), { passive: true });
 
+  // Tapping a chip of the quick entry must not take the cursor out of the title (and the keyboard away).
+  document.addEventListener('mousedown', (e) => {
+    if (e.target.closest && e.target.closest('.qchip')) e.preventDefault();
+  });
+
   document.addEventListener('click', (e) => {
     if (performance.now() < suppressClickUntil) {
       e.preventDefault();
@@ -7489,6 +9380,15 @@ function bindEvents() {
       return;
     }
     setPath(ui.sheet, path, el.dataset.num ? (el.value === '' ? '' : Number(el.value)) : el.value);
+    if (path === 'task.title' && ui.sheet.kind === 'add') {
+      // Quick entry: "morgen", "50xp", "#schule" and the like fill in the form while typing.
+      const q = applyQuick(ui.sheet.task);
+      if (q.fresh) {
+        Sound.play('select', { i: 3 });
+        Haptic('tick');
+      }
+      if (q.touched) renderSheet();
+    }
     if (el.dataset.rerender) renderSheet();
   });
 
@@ -7519,6 +9419,17 @@ function bindEvents() {
       const tip = $('#heatTip');
       if (tip) tip.textContent = cell.dataset.tip;
     }
+    const bar = e.target.closest && e.target.closest('.wkc-col[data-tip]');
+    if (bar) {
+      const tip = $('#insTip');
+      if (tip) tip.textContent = bar.dataset.tip;
+    }
+  });
+  document.addEventListener('mouseout', (e) => {
+    if (!e.target.closest || !e.target.closest('.wkc-chart')) return;
+    if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.wkc-chart')) return;
+    const tip = $('#insTip');
+    if (tip) tip.textContent = tip.dataset.rest;
   });
 
   document.addEventListener('keydown', (e) => {
@@ -7626,6 +9537,11 @@ function initRowSwipe() {
     'pointermove',
     (e) => {
       if (!s || e.pointerId !== s.id) return;
+      if (dragActive) {
+        // The row was picked up for sorting: no swipe any more.
+        s = null;
+        return;
+      }
       const dx = e.clientX - s.x;
       const dy = e.clientY - s.y;
       if (!s.active) {
@@ -7916,6 +9832,29 @@ function makeGrain() {
   }
 }
 
+/** App shortcuts (long press on the home screen icon) open the app with a wish in the address. */
+function openFromLink() {
+  if (TARGET !== 'pwa') return;
+  let q;
+  try {
+    q = new URLSearchParams(location.search);
+  } catch {
+    return;
+  }
+  const neu = q.get('neu');
+  const tab = q.get('tab');
+  if (!neu && !tab) return;
+  try {
+    // The wish is for this start only: a reload must not open the form again.
+    history.replaceState(null, '', location.pathname);
+  } catch {
+    /* optional */
+  }
+  if (['today', 'goals', 'rems', 'levels'].includes(tab)) switchTab(tab);
+  const pane = { aufgabe: 'task', erinnerung: 'rem', ziel: 'goal' }[neu];
+  if (pane) openAdd(pane);
+}
+
 function start() {
   loadStore();
   let warned = false;
@@ -7924,11 +9863,15 @@ function start() {
     warned = true;
     toast('Speichern hat nicht geklappt. Im privaten Modus oder bei vollem Speicher gehen Änderungen verloren.', { ms: 9000 });
   };
+  const firstRun = !L.seeded;
   if (!L.seeded) {
     if (!COLS.some((c) => Object.keys(S[c]).length)) seedDemo();
     L.seeded = true;
     saveLocal();
   }
+  // What is already earned counts as celebrated: fanfare is only for what comes from now on.
+  const knewBadges = L.badges != null;
+  const earned = badgesMarkQuietly();
   root.dataset.tab = ui.tab;
   root.classList.toggle('t-artifact', TARGET === 'artifact');
   makeGrain();
@@ -7936,12 +9879,26 @@ function start() {
   Scene.mount($('#scene'));
   bindEvents();
   initRowSwipe();
+  initRowDrag();
   initStripSwipe();
   initHold();
   initSheetDrag();
   renderNow();
+  openFromLink();
+  if (!knewBadges && !firstRun && earned) {
+    setTimeout(() => {
+      toast(`Neu: Erfolge. ${earned === 1 ? 'Einen' : earned} hast du schon freigeschaltet.`, {
+        actionLabel: 'Ansehen',
+        action: () => openSheet({ kind: 'badges', sel: '' }),
+        ms: 9000,
+      });
+    }, 1200);
+  }
   Sync.init({
-    onRemoteChange: render,
+    onRemoteChange: () => {
+      badgesMarkQuietly();
+      render();
+    },
     onStatus: () => {
       if (ui.sheet && ui.sheet.kind === 'settings') renderSheet();
     },

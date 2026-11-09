@@ -14,6 +14,8 @@ const ui = {
   dialog: null,
   installEvent: null,
   heatTip: null,
+  insWeek: null,
+  insDay: null,
 };
 
 const root = document.documentElement;
@@ -277,7 +279,17 @@ function levelUpItems(res) {
     items.push({ name: cat.name, emoji: cat.emoji, color: cat.color, from: res.before.cat.level, to: res.after.cat.level, rankBefore: rankOf(res.before.cat.level), rank: rankOf(res.after.cat.level) });
   }
   if (res.after.total.level > res.before.total.level) {
-    items.push({ name: 'Gesamt-Level', emoji: '☀️', color: '#FFC145', from: res.before.total.level, to: res.after.total.level, rankBefore: rankOf(res.before.total.level), rank: rankOf(res.after.total.level) });
+    const sky = Scene.themes().filter((t) => t.level > res.before.total.level && t.level <= res.after.total.level).pop();
+    items.push({
+      name: 'Gesamt-Level',
+      emoji: '☀️',
+      color: '#FFC145',
+      from: res.before.total.level,
+      to: res.after.total.level,
+      rankBefore: rankOf(res.before.total.level),
+      rank: rankOf(res.after.total.level),
+      extra: sky ? `Neuer Himmel freigeschaltet: ${sky.name}` : '',
+    });
   }
   return items;
 }
@@ -287,6 +299,13 @@ function finaleNow() {
   Sound.play('alldone');
   Haptic('heavy');
   Fx.confetti(150);
+}
+
+/** Freshly earned badges drop in once the level-up screens (and the day's finale) are through. */
+function celebrateBadges(delay, afterFinale) {
+  const fresh = badgesCollect();
+  if (!fresh.length) return;
+  LevelUp.afterAll(() => setTimeout(() => BadgeBanner.push(fresh), afterFinale ? 1900 : 0), delay);
 }
 
 /* ------------------------------------------------------------ Task actions */
@@ -319,6 +338,7 @@ function toggleTask(id, date, chk) {
   } else if (clean) {
     setTimeout(finaleNow, 820);
   }
+  celebrateBadges(1300, clean);
 }
 
 function rowElement(id, date) {
@@ -446,13 +466,15 @@ function finishGoal(id, el) {
   setTimeout(renderNow, 520);
   const levels = levelUpItems(res);
   if (levels.length) setTimeout(() => levels.forEach(LevelUp.push), 1350);
+  celebrateBadges(1400, false);
 }
 
 /* --------------------------------------------------------- Form submission */
 function submitTask() {
   const sh = ui.sheet;
   const d = sh.task;
-  const title = (d.title || '').trim();
+  // In a new task the words of the quick entry ("morgen", "50xp") are in the form by now and leave the title.
+  const title = sh.kind === 'add' ? applyQuick(d).title : (d.title || '').trim();
   if (!title) return shake('#f-title');
   if (d.repeatOn && !d.days.length) return shake('#wdPick');
   const xp = cleanXp(d.xp);
@@ -474,6 +496,14 @@ function submitTask() {
         actionLabel: 'Anzeigen',
         action: () => goToDay(first),
       });
+    } else if (!L.sortHint) {
+      // Sorting has no button, so it is said once, the first time there is something to sort.
+      const st = dayStat(ui.date);
+      if (st.total - st.done >= 2) {
+        L.sortHint = true;
+        saveLocal();
+        toast('Tipp: Aufgabe gedrückt halten und ziehen, dann sortierst du sie.', { ms: 7000 });
+      }
     }
     renderNow();
     return;
@@ -732,6 +762,7 @@ const A = {
           kind: 'danger',
           fn: () => {
             removeDemo();
+            badgesPrune();
             Sound.play('remove');
             if (ui.sheet) closeSheet();
             renderNow();
@@ -943,6 +974,15 @@ const A = {
     Haptic('tick');
     renderSheet();
   },
+  'quick-off': (el) => {
+    const d = ui.sheet && ui.sheet.task;
+    if (!d) return;
+    (d.quickOff || (d.quickOff = {}))[el.dataset.key] = true;
+    applyQuick(d);
+    Sound.play('close');
+    Haptic('tick');
+    renderSheet();
+  },
   flip: (el) => {
     const path = el.dataset.path;
     if (path.startsWith('L.')) {
@@ -1059,6 +1099,49 @@ const A = {
   },
   'close-level': () => LevelUp.close(),
 
+  /* Erfolge, Himmel, Wochenrückblick */
+  badges: (el) => {
+    BadgeBanner.hide();
+    openSheet({ kind: 'badges', sel: el.dataset.id || '' });
+  },
+  badge: (el) => {
+    ui.sheet.sel = el.dataset.id;
+    renderSheet();
+  },
+  'set-sky': (el) => {
+    const t = Scene.themes().find((x) => x.id === el.dataset.id);
+    if (!t) return;
+    if (totalLevel(derived().xpTotal).level < t.level) {
+      shake(el);
+      toast(`„${t.name}“ gibt es ab Gesamt-Level ${t.level}.`);
+      return;
+    }
+    if (t.active) {
+      Sound.play('tap');
+      Scene.setTheme(t.id, true);
+      return;
+    }
+    L.sky = t.id;
+    saveLocal();
+    Scene.setTheme(t.id, true);
+    Sound.play('sky');
+    Haptic('success');
+    renderNow();
+  },
+  'ins-week': (el) => {
+    const cur = weekStart(todayStr());
+    const next = addDays(ui.insWeek || cur, Number(el.dataset.dir) * 7);
+    if (next > cur) return;
+    ui.insWeek = next;
+    ui.insDay = null;
+    renderNow();
+  },
+  'ins-day': (el) => {
+    ui.insDay = ui.insDay === el.dataset.date ? null : el.dataset.date;
+    Sound.play('tap');
+    renderNow();
+  },
+
   'submit-task': submitTask,
   'submit-rem': submitRem,
   'submit-goal': submitGoal,
@@ -1077,6 +1160,7 @@ const A = {
           kind: 'danger',
           fn: () => {
             wipeAll();
+            badgesPrune();
             Sound.play('remove');
             closeSheet();
             renderNow();
@@ -1123,6 +1207,11 @@ let suppressClickUntil = 0;
 function bindEvents() {
   document.addEventListener('pointerdown', () => Sound.unlock(), { passive: true });
 
+  // Tapping a chip of the quick entry must not take the cursor out of the title (and the keyboard away).
+  document.addEventListener('mousedown', (e) => {
+    if (e.target.closest && e.target.closest('.qchip')) e.preventDefault();
+  });
+
   document.addEventListener('click', (e) => {
     if (performance.now() < suppressClickUntil) {
       e.preventDefault();
@@ -1164,6 +1253,15 @@ function bindEvents() {
       return;
     }
     setPath(ui.sheet, path, el.dataset.num ? (el.value === '' ? '' : Number(el.value)) : el.value);
+    if (path === 'task.title' && ui.sheet.kind === 'add') {
+      // Quick entry: "morgen", "50xp", "#schule" and the like fill in the form while typing.
+      const q = applyQuick(ui.sheet.task);
+      if (q.fresh) {
+        Sound.play('select', { i: 3 });
+        Haptic('tick');
+      }
+      if (q.touched) renderSheet();
+    }
     if (el.dataset.rerender) renderSheet();
   });
 
@@ -1194,6 +1292,17 @@ function bindEvents() {
       const tip = $('#heatTip');
       if (tip) tip.textContent = cell.dataset.tip;
     }
+    const bar = e.target.closest && e.target.closest('.wkc-col[data-tip]');
+    if (bar) {
+      const tip = $('#insTip');
+      if (tip) tip.textContent = bar.dataset.tip;
+    }
+  });
+  document.addEventListener('mouseout', (e) => {
+    if (!e.target.closest || !e.target.closest('.wkc-chart')) return;
+    if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.wkc-chart')) return;
+    const tip = $('#insTip');
+    if (tip) tip.textContent = tip.dataset.rest;
   });
 
   document.addEventListener('keydown', (e) => {
@@ -1301,6 +1410,11 @@ function initRowSwipe() {
     'pointermove',
     (e) => {
       if (!s || e.pointerId !== s.id) return;
+      if (dragActive) {
+        // The row was picked up for sorting: no swipe any more.
+        s = null;
+        return;
+      }
       const dx = e.clientX - s.x;
       const dy = e.clientY - s.y;
       if (!s.active) {
@@ -1591,6 +1705,29 @@ function makeGrain() {
   }
 }
 
+/** App shortcuts (long press on the home screen icon) open the app with a wish in the address. */
+function openFromLink() {
+  if (TARGET !== 'pwa') return;
+  let q;
+  try {
+    q = new URLSearchParams(location.search);
+  } catch {
+    return;
+  }
+  const neu = q.get('neu');
+  const tab = q.get('tab');
+  if (!neu && !tab) return;
+  try {
+    // The wish is for this start only: a reload must not open the form again.
+    history.replaceState(null, '', location.pathname);
+  } catch {
+    /* optional */
+  }
+  if (['today', 'goals', 'rems', 'levels'].includes(tab)) switchTab(tab);
+  const pane = { aufgabe: 'task', erinnerung: 'rem', ziel: 'goal' }[neu];
+  if (pane) openAdd(pane);
+}
+
 function start() {
   loadStore();
   let warned = false;
@@ -1599,11 +1736,15 @@ function start() {
     warned = true;
     toast('Speichern hat nicht geklappt. Im privaten Modus oder bei vollem Speicher gehen Änderungen verloren.', { ms: 9000 });
   };
+  const firstRun = !L.seeded;
   if (!L.seeded) {
     if (!COLS.some((c) => Object.keys(S[c]).length)) seedDemo();
     L.seeded = true;
     saveLocal();
   }
+  // What is already earned counts as celebrated: fanfare is only for what comes from now on.
+  const knewBadges = L.badges != null;
+  const earned = badgesMarkQuietly();
   root.dataset.tab = ui.tab;
   root.classList.toggle('t-artifact', TARGET === 'artifact');
   makeGrain();
@@ -1611,12 +1752,26 @@ function start() {
   Scene.mount($('#scene'));
   bindEvents();
   initRowSwipe();
+  initRowDrag();
   initStripSwipe();
   initHold();
   initSheetDrag();
   renderNow();
+  openFromLink();
+  if (!knewBadges && !firstRun && earned) {
+    setTimeout(() => {
+      toast(`Neu: Erfolge. ${earned === 1 ? 'Einen' : earned} hast du schon freigeschaltet.`, {
+        actionLabel: 'Ansehen',
+        action: () => openSheet({ kind: 'badges', sel: '' }),
+        ms: 9000,
+      });
+    }, 1200);
+  }
   Sync.init({
-    onRemoteChange: render,
+    onRemoteChange: () => {
+      badgesMarkQuietly();
+      render();
+    },
     onStatus: () => {
       if (ui.sheet && ui.sheet.kind === 'settings') renderSheet();
     },

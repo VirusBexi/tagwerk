@@ -185,7 +185,7 @@ function taskRow(task, date, done, opts = {}) {
     if (n >= 2) meta.push(`<span class="m hot">${I.flame}${n}×</span>`);
   }
   const attrs = `data-id="${task.id}" data-date="${date}"`;
-  return `<div class="row-wrap" data-k="${task.id}|${date}" data-flip style="--i:${opts.i || 0}">
+  return `<div class="row-wrap" data-k="${task.id}|${date}" data-flip ${opts.drag ? 'data-drag' : ''} style="--i:${opts.i || 0}">
     <div class="row-under" aria-hidden="true">
       <span class="u u-done">${I.check}Erledigt</span>
       <span class="u u-move">Morgen${I.arrow}</span>
@@ -276,7 +276,7 @@ function viewToday() {
       <p>Leg eine Aufgabe an oder nimm eine aus deinen Vorlagen. Jede erledigte Aufgabe hebt die Sonne ein Stück höher.</p>
     </div>`);
   }
-  open.forEach(({ task }) => parts.push(taskRow(task, date, false, { i: i++ })));
+  open.forEach(({ task }) => parts.push(taskRow(task, date, false, { i: i++, drag: open.length > 1 })));
   parts.push(
     `<button class="add-row" data-k="add-row" data-act="add" data-flip>${I.plus}Aufgabe für ${esc(label === 'Heute' || label === 'Morgen' || label === 'Übermorgen' ? label.toLowerCase() : label)}</button>`,
   );
@@ -573,11 +573,14 @@ function viewLevels() {
         <div><dt>Erledigt</dt><dd>${d.taskCount + d.goalCount}</dd></div>
       </dl>
     </section>
-    ${groupHead('h-heat', 'Deine letzten Wochen')}
-    ${heatmap()}
+    ${badgeSection()}
+    ${weekReview()}
     ${groupHead('h-cats', 'Kategorien', `<button class="gh-btn" data-act="new-cat">${I.plus}Neu</button>`)}
     <div class="cat-list" data-k="cat-list">
       ${cats.map(catCard).join('') || `<div class="empty small" data-k="e-cats"><p>Lege Kategorien an wie „Schule“ oder „Sport“. In jeder levelst du getrennt auf.</p></div>`}
     </div>
+    ${skySection()}
+    ${groupHead('h-heat', 'Deine letzten Wochen')}
+    ${heatmap()}
   </div>`;
 }

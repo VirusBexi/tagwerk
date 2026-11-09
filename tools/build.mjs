@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const src = (p) => new URL(`../src/${p}`, import.meta.url);
 const read = (p) => readFileSync(src(p), 'utf8');
 
@@ -82,6 +82,17 @@ const manifest = {
     { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
   ],
+  // Long press on the app icon. The app reads the wish from the address (openFromLink).
+  shortcuts: [
+    ['Neue Aufgabe', 'Aufgabe', './?neu=aufgabe'],
+    ['Neue Erinnerung', 'Erinnerung', './?neu=erinnerung'],
+    ['Level und Erfolge', 'Level', './?tab=levels'],
+  ].map(([name, short_name, url]) => ({
+    name,
+    short_name,
+    url,
+    icons: [{ src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' }],
+  })),
 };
 
 const out = (p) => new URL(`../${p}`, import.meta.url);

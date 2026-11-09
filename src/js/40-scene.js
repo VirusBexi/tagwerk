@@ -5,13 +5,95 @@
    Stars and clouds are separate layers, so only the compositor animates them. */
 
 const Scene = (() => {
-  const STOPS = [
-    { p: 0, bands: ['#0B0E27', '#0E112E', '#111535', '#14183C', '#171C44', '#1B204C', '#1F2455', '#23285E'], sun: '#2B2F6C', far: '#161A4A', mid: '#10133A', near: '#0B0D24' },
-    { p: 0.25, bands: ['#12133A', '#191749', '#231C59', '#2F2168', '#3E2775', '#522E7F', '#6A3585', '#853C86'], sun: '#FF8A5F', far: '#2C1F60', mid: '#1A174A', near: '#0C0E28' },
-    { p: 0.5, bands: ['#2A1B5E', '#43236F', '#60297B', '#802F7F', '#A0387C', '#C04674', '#DC5868', '#F0705B'], sun: '#FFC76E', far: '#5B2771', mid: '#301C56', near: '#100F2C' },
-    { p: 0.75, bands: ['#6B2A7A', '#93347C', '#B84076', '#D6506A', '#EA655B', '#F5804E', '#FA9C47', '#FDB94A'], sun: '#FFE28C', far: '#A33C6E', mid: '#5C2361', near: '#15102E' },
-    { p: 1, bands: ['#E8503F', '#F0663B', '#F67E38', '#FA9537', '#FDAD3A', '#FEC447', '#FFD762', '#FFE685'], sun: '#FFF7CC', far: '#C8463F', mid: '#7A2A56', near: '#1A1130' },
-  ];
+  /* ------------------------------------------------------------- Colors */
+  const hex2rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const mix = (a, b, t) => {
+    const x = hex2rgb(a);
+    const y = hex2rgb(b);
+    return `#${[0, 1, 2].map((i) => Math.round(lerp(x[i], y[i], t)).toString(16).padStart(2, '0')).join('')}`;
+  };
+  /** Eight sky bands, from the far edge to the ring around the sun, spread along a few anchor colours. */
+  const ramp = (anchors) =>
+    Array.from({ length: 8 }, (_, i) => {
+      const x = (i / 7) * (anchors.length - 1);
+      const k = Math.min(Math.floor(x), anchors.length - 2);
+      return mix(anchors[k], anchors[k + 1], x - k);
+    });
+  const stop = (p, anchors, sun, far, mid, near) => ({ p, bands: ramp(anchors), sun, far, mid, near });
+
+  /* Every sky tells the same story (night first, full light when the day is done)
+     in its own colours. `level` is the overall level that unlocks it; `ink` is the
+     title colour once the sky gets bright (null: the sky stays dark enough for cream). */
+  const THEMES = {
+    abendrot: {
+      name: 'Abendrot',
+      note: 'Von Nachtblau über Koralle zu Gold',
+      level: 1,
+      ink: '#2A0F2E',
+      stops: [
+        { p: 0, bands: ['#0B0E27', '#0E112E', '#111535', '#14183C', '#171C44', '#1B204C', '#1F2455', '#23285E'], sun: '#2B2F6C', far: '#161A4A', mid: '#10133A', near: '#0B0D24' },
+        { p: 0.25, bands: ['#12133A', '#191749', '#231C59', '#2F2168', '#3E2775', '#522E7F', '#6A3585', '#853C86'], sun: '#FF8A5F', far: '#2C1F60', mid: '#1A174A', near: '#0C0E28' },
+        { p: 0.5, bands: ['#2A1B5E', '#43236F', '#60297B', '#802F7F', '#A0387C', '#C04674', '#DC5868', '#F0705B'], sun: '#FFC76E', far: '#5B2771', mid: '#301C56', near: '#100F2C' },
+        { p: 0.75, bands: ['#6B2A7A', '#93347C', '#B84076', '#D6506A', '#EA655B', '#F5804E', '#FA9C47', '#FDB94A'], sun: '#FFE28C', far: '#A33C6E', mid: '#5C2361', near: '#15102E' },
+        { p: 1, bands: ['#E8503F', '#F0663B', '#F67E38', '#FA9537', '#FDAD3A', '#FEC447', '#FFD762', '#FFE685'], sun: '#FFF7CC', far: '#C8463F', mid: '#7A2A56', near: '#1A1130' },
+      ],
+    },
+    polarlicht: {
+      name: 'Polarlicht',
+      note: 'Grünes Leuchten über dem Fjord',
+      level: 2,
+      ink: '#06262E',
+      stops: [
+        stop(0, ['#070B1E', '#12203F'], '#1F3A5C', '#0F1D3A', '#0B1530', '#080F22'),
+        stop(0.25, ['#081226', '#0E2A45', '#135A5E'], '#5FE3A1', '#12354B', '#0D2238', '#081226'),
+        stop(0.5, ['#0B1B3A', '#12506A', '#1FA587'], '#A6F5C0', '#15506A', '#0E2F4C', '#0A162C'),
+        stop(0.75, ['#123A6B', '#1B8E94', '#52D99A'], '#D9FFCB', '#1C7C86', '#12476A', '#0B1930'),
+        stop(1, ['#1FA8A0', '#55DE9E', '#C8F78A'], '#FBFFD9', '#1E8F8C', '#14566F', '#0C1C34'),
+      ],
+    },
+    lagune: {
+      name: 'Lagune',
+      note: 'Tiefblau bis türkis, wie ein Sommertag am Meer',
+      level: 4,
+      ink: '#08173F',
+      stops: [
+        stop(0, ['#060A20', '#0F1A45'], '#22326F', '#111C4A', '#0C143A', '#080D26'),
+        stop(0.25, ['#0A1238', '#16307A', '#2B5BB5'], '#7CC8FF', '#1A2E72', '#111D52', '#090F2C'),
+        stop(0.5, ['#0F2466', '#1E5BC0', '#33A7E0'], '#BDEBFF', '#1E55A8', '#132F74', '#0A1232'),
+        stop(0.75, ['#1949B0', '#2D9BE6', '#62DCEB'], '#E6FBFF', '#2581C4', '#164A8E', '#0B1638'),
+        stop(1, ['#2F8FEA', '#5CD6F0', '#B8F5E4', '#FFF1B8'], '#FFFDE8', '#2E9FCC', '#1B5E9A', '#0C193E'),
+      ],
+    },
+    kirschbluete: {
+      name: 'Kirschblüte',
+      note: 'Pflaume, Pink und ganz viel Rosa',
+      level: 6,
+      ink: '#3B0F38',
+      stops: [
+        stop(0, ['#120A22', '#24123F'], '#3D2060', '#22123E', '#190D30', '#110920'),
+        stop(0.25, ['#1C0E38', '#431B5C', '#7A2B74'], '#FF8FC0', '#3C1A58', '#27113F', '#130A24'),
+        stop(0.5, ['#33165A', '#82307F', '#D0528F'], '#FFC2DC', '#6E2A76', '#40195A', '#150B28'),
+        stop(0.75, ['#6C2A86', '#C9529A', '#F58FB0'], '#FFE1EC', '#A8448C', '#5E2370', '#180C2C'),
+        stop(1, ['#E86AA6', '#F9A3BC', '#FFD9D2'], '#FFF8F0', '#C9578F', '#7A2F78', '#1C0E30'),
+      ],
+    },
+    neon: {
+      name: 'Neon',
+      note: 'Synthwave: Violett, Magenta, Laserlicht',
+      level: 9,
+      ink: null,
+      stops: [
+        stop(0, ['#07051A', '#150B3A'], '#2A1670', '#160C40', '#0F082E', '#09051C'),
+        stop(0.25, ['#0D0730', '#2A0F6E', '#5A18A8'], '#FF4FD8', '#27106A', '#180A48', '#0B0622'),
+        stop(0.5, ['#1A0A5C', '#5A1BC0', '#B02BE0'], '#FF8AE8', '#4A16A0', '#260D68', '#0D0726'),
+        stop(0.75, ['#3B14B8', '#9B2DEB', '#F04FD6'], '#FFC4F4', '#7C22C4', '#3C1284', '#0F082A'),
+        stop(1, ['#5A2BEA', '#B845F5', '#FF6AD5', '#FFB86B'], '#FFF3C4', '#8B2BD4', '#4A1796', '#110930'),
+      ],
+    },
+  };
+  const THEME_IDS = Object.keys(THEMES);
+  let theme = 'abendrot';
+  let STOPS = THEMES[theme].stops;
   const BAND_SIZES = [11, 8.2, 6.1, 4.5, 3.3, 2.4, 1.65];
   const SLIM_DROP = 90; // how much shorter the sky is outside the "Heute" tab on phones
 
@@ -27,19 +109,14 @@ const Scene = (() => {
   let sunY = 0;
   let halo, sunEl, bandEls, farEl, midEl, nearEl, treesEl;
   let finaleTimer = 0;
+  let glimpse = null; // a progress value shown for a moment instead of the real one
+  let glimpseTimer = 0;
 
-  /* ------------------------------------------------------------- Colors */
-  const hex2rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-  const mix = (a, b, t) => {
-    const x = hex2rgb(a);
-    const y = hex2rgb(b);
-    return `#${[0, 1, 2].map((i) => Math.round(lerp(x[i], y[i], t)).toString(16).padStart(2, '0')).join('')}`;
-  };
-  function colorsAt(p) {
+  function colorsAt(p, stops = STOPS) {
     let i = 0;
-    while (i < STOPS.length - 2 && p > STOPS[i + 1].p) i++;
-    const a = STOPS[i];
-    const b = STOPS[i + 1];
+    while (i < stops.length - 2 && p > stops[i + 1].p) i++;
+    const a = stops[i];
+    const b = stops[i + 1];
     const t = clamp((p - a.p) / (b.p - a.p), 0, 1);
     return {
       bands: a.bands.map((c, n) => mix(c, b.bands[n], t)),
@@ -177,7 +254,7 @@ const Scene = (() => {
 
   function apply() {
     if (!W || !halo) return;
-    const p = progress;
+    const p = glimpse == null ? progress : glimpse;
     const c = colorsAt(p);
     bandEls.forEach((el, i) => {
       el.style.fill = c.bands[i];
@@ -202,15 +279,20 @@ const Scene = (() => {
     cloudsEl.style.fill = mix(c.bands[3], '#FFF4E0', 0.28);
 
     const rootStyle = document.documentElement.style;
+    const ink = p >= 0.82 ? THEMES[theme].ink : null;
     rootStyle.setProperty('--ground', c.near);
-    rootStyle.setProperty('--hero-fg', p >= 0.82 ? '#2A0F2E' : '#FFF4E0');
-    rootStyle.setProperty('--hero-shadow', p >= 0.82 ? 'rgba(255, 240, 200, 0.28)' : 'rgba(30, 10, 50, 0.38)');
+    rootStyle.setProperty('--hero-fg', ink || '#FFF4E0');
+    rootStyle.setProperty('--hero-shadow', ink ? 'rgba(255, 240, 200, 0.28)' : 'rgba(30, 10, 50, 0.38)');
     const meta = $('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', c.bands[0]);
   }
 
   /* ---------------------------------------------------------------- API */
   function mount(el) {
+    if (THEMES[L.sky]) {
+      theme = L.sky;
+      STOPS = THEMES[theme].stops;
+    }
     root = el;
     wrap = $('.sky-wrap', el);
     skyEl = $('.sky', el);
@@ -236,6 +318,29 @@ const Scene = (() => {
     slim = isSlim;
     if (changed) apply();
   }
+
+  /** Switches the sky. With `show`, the finished day is shown for a moment, so you see what you picked. */
+  function setTheme(id, show) {
+    if (!THEMES[id]) return;
+    theme = id;
+    STOPS = THEMES[id].stops;
+    clearTimeout(glimpseTimer);
+    glimpse = show && motionOK() ? 1 : null;
+    apply();
+    if (glimpse != null) {
+      glimpseTimer = setTimeout(() => {
+        glimpse = null;
+        apply();
+      }, 2300);
+    }
+  }
+
+  /** The skies in unlock order, each with the colours of a late afternoon for a small preview. */
+  const themes = () =>
+    THEME_IDS.map((id) => {
+      const t = THEMES[id];
+      return { id, name: t.name, note: t.note, level: t.level, active: id === theme, colors: colorsAt(0.8, t.stops) };
+    });
 
   function pulse() {
     if (!sunEl || !motionOK()) return;
@@ -271,7 +376,7 @@ const Scene = (() => {
     finaleTimer = setTimeout(() => root.classList.remove('finale'), 4200);
   }
 
-  return { mount, set, pulse, sunPoint, finale, SLIM_DROP };
+  return { mount, set, setTheme, themes, pulse, sunPoint, finale, SLIM_DROP };
 })();
 
 function motionOK() {

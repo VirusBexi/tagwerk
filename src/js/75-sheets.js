@@ -144,10 +144,23 @@ function repeatEditor(d) {
 const titleInput = (id, path, value, placeholder) =>
   `<input id="${id}" class="big-input" type="text" data-bind="${path}" data-enter="submit" value="${esc(value)}" placeholder="${placeholder}" maxlength="140" autocomplete="off" enterkeyhint="done" aria-label="${placeholder}">`;
 
+/** Under the title of a new task: what was read out of it, each one to wave away, or the tip how it works. */
+function quickLine(d) {
+  const parts = d.quickParts || [];
+  const chips = parts
+    .map(
+      (p) =>
+        `<button type="button" class="qchip" data-k="q-${p.kind}" data-act="quick-off" data-fx="none" data-key="${esc(p.key)}" title="Nicht übernehmen" aria-label="${esc(p.label)}, erkannt. Tippen, um es nicht zu übernehmen.">${esc(p.label)}${I.x}</button>`,
+    )
+    .join('');
+  return `<div class="quick" data-k="quick" aria-live="polite">${chips || `<p class="hint">Tipp: „Mathe morgen 50xp #schule“ füllt alles aus.</p>`}</div>`;
+}
+
 /* ----------------------------------------------------------------- Forms */
 function taskForm(d, isEdit) {
   return `
     ${titleInput('f-title', 'task.title', d.title, 'Was steht an?')}
+    ${isEdit ? '' : quickLine(d)}
     ${catPicker('task.catId', d.catId)}
     ${xpPicker('task.xp', d.xp, XP_TASK)}
     ${datePicker('task', d, d.repeatOn ? 'Ab wann?' : 'Wann?')}
@@ -430,6 +443,8 @@ function sheetContent() {
       };
     case 'settings':
       return { label: 'Einstellungen', head: `<h2>Einstellungen</h2>`, body: settingsBody(), foot: `<button class="btn ghost wide" data-act="close-sheet">Fertig</button>` };
+    case 'badges':
+      return { label: 'Erfolge', head: `<h2>Erfolge <small class="h2-count">${badgeCount()} / ${BADGES.length}</small></h2>`, body: badgesBody(sh), foot: '' };
     default:
       return { label: '', head: '', body: '', foot: '' };
   }

@@ -236,7 +236,7 @@ const Hud = (() => {
 const LevelUp = (() => {
   const queue = [];
   let open = false;
-  let afterQueue = null;
+  let waiting = [];
 
   function next() {
     const item = queue.shift();
@@ -244,15 +244,13 @@ const LevelUp = (() => {
     if (!item) {
       open = false;
       host.innerHTML = '';
-      if (afterQueue) {
-        const fn = afterQueue;
-        afterQueue = null;
-        setTimeout(fn, 260);
-      }
+      const fns = waiting;
+      waiting = [];
+      fns.forEach((fn) => setTimeout(fn, 260));
       return;
     }
     open = true;
-    const { name, emoji, color, from, to, rankBefore, rank } = item;
+    const { name, emoji, color, from, to, rankBefore, rank, extra } = item;
     host.innerHTML = `
       <div class="lvl" style="--c:${esc(color)}" data-act="close-level" role="dialog" aria-label="Level ${to} erreicht">
         <div class="lvl-bands" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -262,6 +260,7 @@ const LevelUp = (() => {
           <div class="lvl-num" aria-hidden="true"><span class="old">${from}</span><span class="new">${to}</span></div>
           <p class="lvl-title">Level ${to}!</p>
           <p class="lvl-rank">${rank !== rankBefore ? `Neuer Rang: ${esc(rank)}` : esc(rank)}</p>
+          ${extra ? `<p class="lvl-extra">${esc(extra)}</p>` : ''}
         </div>
         <button class="btn lvl-btn" data-act="close-level">Weiter</button>
       </div>`;
@@ -287,12 +286,71 @@ const LevelUp = (() => {
   /** Runs fn once all level-up screens are gone (they start after `delay`). */
   function afterAll(fn, delay = 0) {
     setTimeout(() => {
-      if (open || queue.length) afterQueue = fn;
+      if (open || queue.length) waiting.push(fn);
       else fn();
     }, delay + 20);
   }
 
   return { push, close, afterAll, get open() { return open; } };
+})();
+
+/* ========================================================= Erfolg-Banner
+   A freshly earned badge drops in from the top, one at a time. */
+const BadgeBanner = (() => {
+  const queue = [];
+  let showing = false;
+  let timer = 0;
+  let host;
+
+  const medalHtml = (b, cls = '') =>
+    `<span class="medal ${cls}" style="--c:${esc(b.color)}" aria-hidden="true"><i>${esc(b.emoji)}</i></span>`;
+
+  function next() {
+    host = host || $('#badgeRoot');
+    const b = queue.shift();
+    if (!b) {
+      showing = false;
+      return;
+    }
+    showing = true;
+    host.innerHTML = `
+      <button class="bdg-pop" style="--c:${esc(b.color)}" data-act="badges" data-id="${esc(b.id)}" data-fx="none">
+        <span class="bdg-pop-shine" aria-hidden="true"></span>
+        ${medalHtml(b, 'on')}
+        <span class="bdg-pop-text">
+          <small>Erfolg freigeschaltet</small>
+          <b>${esc(b.name)}</b>
+          <span>${esc(b.desc)}</span>
+        </span>
+      </button>`;
+    Sound.play('badge');
+    Haptic('success');
+    setTimeout(() => {
+      const m = $('.medal', host);
+      if (!m) return;
+      const r = m.getBoundingClientRect();
+      Fx.burst(r.left + r.width / 2, r.top + r.height / 2, b.color, 20, 1.5);
+    }, 330);
+    timer = setTimeout(hide, 3800);
+  }
+
+  function hide() {
+    clearTimeout(timer);
+    const el = host && host.firstElementChild;
+    if (!el) return next();
+    el.classList.add('out');
+    setTimeout(() => {
+      host.innerHTML = '';
+      next();
+    }, 240);
+  }
+
+  function push(list) {
+    queue.push(...list);
+    if (!showing) next();
+  }
+
+  return { push, hide, medalHtml };
 })();
 
 /* Number roll-up for counters in the sky. */

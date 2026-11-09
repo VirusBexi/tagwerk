@@ -6,6 +6,8 @@ import assert from 'node:assert/strict';
 const code =
   readFileSync(new URL('../src/js/00-util.js', import.meta.url), 'utf8') +
   readFileSync(new URL('../src/js/10-store.js', import.meta.url), 'utf8') +
+  readFileSync(new URL('../src/js/16-quick.js', import.meta.url), 'utf8') +
+  readFileSync(new URL('../src/js/80-drag.js', import.meta.url), 'utf8').match(/function reorderTasks[\s\S]*?\n}\n/)[0] +
   `
   globalThis.__t = { addDays, diffDays, weekStart, isoWeek, weekdayOf, fmtWeekRange, addMonths,
     makeRepeat, repeatHits, occursOn, previewOccurrences, repeatLabel, levelOf, catLevel, totalLevel, rankOf,
@@ -13,7 +15,7 @@ const code =
     deleteTask, routineStreak, streakInfo, addRem, remsForDay, dismissRem, nextOf, ageAt, yearlyDate,
     addGoal, completeGoal, reopenGoal, goalsFor, staleGoals, currentPeriod, derived, mergeRemote, needsPush,
     seedDemo, hasDemo, removeDemo, wipeAll, levelSnapshot, addCat, addTpl, useTpl, icsFor, importPayload, exportPayload,
-    shardState, assembleShards, updateTask,
+    shardState, assembleShards, updateTask, parseQuick, applyQuick, sortedCats, reorderTasks,
     getS: () => S, reset: () => { S = blankState(); rev++; }, setS: (x) => { S = x; rev++; } };
 `;
 const store = new Map();
@@ -271,6 +273,161 @@ test('Kalenderdatei', () => {
   assert.match(ics, /TRIGGER:-P7D/);
   const o = t.addRem({ kind: 'once', title: 'Termin', date: '2026-12-01', time: '15:30' });
   assert.match(t.icsFor(o, '2026-11-08'), /DTSTART:20261201T153000/);
+});
+
+/* ---------------------------------------------------------- Schnelleingabe */
+const MON = '2026-11-09'; // ein Montag
+const CATS = [
+  { id: 'c1', name: 'Schule', emoji: '📚' },
+  { id: 'c2', name: 'Sport', emoji: '🏃' },
+  { id: 'c3', name: 'Kreatives Zeug', emoji: '🎨' },
+];
+const quick = (text, off) => plain(t.parseQuick(text, MON, CATS, off));
+
+test('Schnelleingabe: Datum, XP und Kategorie in einem Satz', () => {
+  const q = quick('Mathe lernen morgen 50xp #schule');
+  assert.equal(q.title, 'Mathe lernen');
+  assert.equal(q.date, '2026-11-10');
+  assert.equal(q.xp, 50);
+  assert.equal(q.catId, 'c1');
+  assert.deepEqual(q.parts.map((p) => p.label), ['Morgen', '+50 XP', '📚 Schule']);
+  assert.equal(quick('Vokabeln +25').xp, 25);
+  assert.equal(quick('Vokabeln 100 XP').title, 'Vokabeln');
+  assert.equal(quick('Skizze #krea').catId, 'c3'); // Anfang des Namens
+  assert.equal(quick('Skizze #zeug').catId, 'c3'); // Anfang eines Worts
+  assert.equal(quick('Skizze #xyz').title, 'Skizze #xyz'); // unbekannt bleibt Text
+});
+
+test('Schnelleingabe: Tage', () => {
+  assert.equal(quick('Zahnarzt am Freitag').date, '2026-11-13');
+  assert.equal(quick('Zahnarzt am Freitag').title, 'Zahnarzt');
+  assert.equal(quick('Montag einkaufen').date, '2026-11-16'); // der nächste, nicht heute
+  assert.equal(quick('Abgabe übermorgen').date, '2026-11-11');
+  assert.equal(quick('Abgabe in 3 Tagen').date, '2026-11-12');
+  assert.equal(quick('Abgabe in zwei Wochen').date, '2026-11-23');
+  assert.equal(quick('Planen nächste Woche').date, '2026-11-16');
+  assert.equal(quick('Party 12.11.').date, '2026-11-12');
+  assert.equal(quick('Party am 24.12').date, '2026-12-24');
+  assert.equal(quick('Party 12.11.2027').date, '2027-11-12');
+  assert.equal(quick('12. Dezember Geschenke').date, '2026-12-12');
+  assert.equal(quick('12. Dezember Geschenke').title, 'Geschenke');
+  // Schon vorbei: nächstes Jahr, und das steht dann auch dran
+  const jan = quick('Urlaub 3.1.');
+  assert.equal(jan.date, '2027-01-03');
+  assert.match(jan.parts[0].label, /2027/);
+  // Das letzte Wort gewinnt, nur das fliegt aus dem Titel
+  assert.equal(quick('heute oder morgen lernen').date, '2026-11-10');
+  assert.equal(quick('heute oder morgen lernen').title, 'heute oder lernen');
+});
+
+test('Schnelleingabe: was kein Datum ist, bleibt stehen', () => {
+  for (const s of ['Lauf 2.5 km', 'Guten Morgen sagen', 'Seite 12.11 lesen', 'Treffen 31.2.', 'Morgens lesen', 'Morgen-Routine', 'Jeden Morgen dehnen']) {
+    const q = quick(s);
+    assert.equal(q.title, s, s);
+    assert.equal(q.date, null, s);
+    assert.equal(q.repeat, null, s);
+  }
+  // "Heute Morgen" ist heute, und die Worte bleiben zusammen im Titel
+  assert.equal(quick('Heute Morgen joggen').date, MON);
+  assert.equal(quick('Heute Morgen joggen').title, 'Heute Morgen joggen');
+  assert.equal(quick('Heute joggen').title, 'joggen');
+  assert.equal(quick('Mathe morgen', { 'date:morgen': true }).title, 'Mathe morgen'); // weggetippt
+  assert.equal(quick('Mathe morgen', { 'date:morgen': true }).date, null);
+});
+
+test('Schnelleingabe: Wiederholungen', () => {
+  const a = quick('Laufen jeden mo mi fr');
+  assert.deepEqual(a.repeat, { days: [1, 3, 5], mode: 'weekly' });
+  assert.equal(a.title, 'Laufen');
+  assert.equal(a.parts[0].label, 'Mo, Mi, Fr');
+  assert.equal(a.date, null); // "jeden Montag" ist nicht "nächsten Montag"
+  assert.deepEqual(quick('Lesen täglich').repeat.days, [1, 2, 3, 4, 5, 6, 7]);
+  assert.deepEqual(quick('Lernen werktags').repeat.days, [1, 2, 3, 4, 5]);
+  assert.deepEqual(quick('montags und mittwochs Training').repeat.days, [1, 3]);
+  assert.equal(quick('montags und mittwochs Training').title, 'Training');
+  assert.deepEqual(quick('Putzen alle 2 Wochen').repeat, { days: [], mode: 'biweekly' });
+  assert.equal(quick('Putzen alle 2 Wochen').parts[0].label, 'Alle 2 Wochen');
+  assert.deepEqual(quick('Müll jeden Dienstag alle zwei Wochen').repeat, { days: [2], mode: 'biweekly' });
+  // "so" ist hier kein Sonntag
+  const so = quick('jeden Montag so viel lernen');
+  assert.deepEqual(so.repeat.days, [1]);
+  assert.equal(so.title, 'so viel lernen');
+  // Wiederholung und Starttag zusammen
+  const both = quick('Gießen jeden Samstag ab 21.11.');
+  assert.deepEqual(both.repeat.days, [6]);
+  assert.equal(both.date, '2026-11-21');
+  assert.equal(both.title, 'Gießen');
+});
+
+test('Schnelleingabe: Formular folgt dem Titel und lässt Handarbeit in Ruhe', () => {
+  t.addCat({ name: 'Schule', emoji: '📚', color: '#fff' });
+  const draft = () => ({ title: '', catId: null, xp: 25, date: MON, repeatOn: false, days: [1], mode: 'weekly', calMonth: '2026-11' });
+  const type = (d, title) => {
+    d.title = title;
+    return t.applyQuick(d, MON);
+  };
+
+  const d = draft();
+  let r = type(d, 'Mathe morgen 50xp #sch');
+  assert.equal(r.fresh, true);
+  assert.equal(r.title, 'Mathe');
+  assert.equal(d.date, '2026-11-10');
+  assert.equal(d.xp, 50);
+  assert.equal(d.catId, t.sortedCats()[0].id);
+  assert.equal(type(d, 'Mathe morgen 50xp #schule').fresh, false); // dieselbe Kategorie, kein neuer Fang
+  d.xp = 100; // von Hand geändert
+  type(d, 'Mathe lernen morgen 50xp #schule');
+  assert.equal(d.xp, 100);
+  type(d, 'Mathe lernen 50xp #schule'); // Wort gelöscht: zurück auf vorher
+  assert.equal(d.date, MON);
+  assert.equal(d.calMonth, '2026-11');
+  type(d, 'Mathe lernen #schule'); // die Handarbeit bleibt
+  assert.equal(d.xp, 100);
+  type(d, 'Mathe lernen');
+  assert.equal(d.catId, null);
+
+  const e = draft();
+  type(e, 'Mathe 50xp');
+  assert.equal(e.xp, 50);
+  type(e, 'Mathe');
+  assert.equal(e.xp, 25);
+  type(e, 'Mathe morgen');
+  e.quickOff = { 'date:morgen': true };
+  r = t.applyQuick(e, MON);
+  assert.equal(e.date, MON);
+  assert.equal(r.title, 'Mathe morgen');
+  assert.equal(plain(e.quickParts).length, 0);
+
+  const f = draft();
+  type(f, 'Sport jede Woche');
+  assert.equal(f.repeatOn, true);
+  assert.deepEqual(plain(f.days), [1]);
+  type(f, 'Sport jede Woche Freitag'); // der Wochentag zieht mit
+  assert.equal(f.date, '2026-11-13');
+  assert.deepEqual(plain(f.days), [5]);
+  type(f, 'Sport');
+  assert.equal(f.repeatOn, false);
+  assert.equal(f.date, MON);
+});
+
+test('Sortieren: neue Reihenfolge bleibt, auch bei gleichen Werten', () => {
+  const ids = ['A', 'B', 'C', 'D'].map((title) => t.addTask({ title, xp: 5, date: MON }).id);
+  ids.forEach((id) => t.updateTask(id, { order: 5000 })); // alle gleich: wird neu durchnummeriert
+  const order = () => t.dayTasks(MON).map((x) => x.task.title).join('');
+  const move = (from, to) => {
+    const list = t.dayTasks(MON).map((x) => x.task.id);
+    const [id] = list.splice(from, 1);
+    list.splice(to, 0, id);
+    t.reorderTasks(list, id);
+  };
+  move(3, 0);
+  assert.equal(order(), 'DABC');
+  move(0, 2);
+  assert.equal(order(), 'ABDC');
+  move(1, 3);
+  assert.equal(order(), 'ADCB');
+  move(2, 1);
+  assert.equal(order(), 'ACDB');
 });
 
 console.log(process.exitCode ? 'Tests fehlgeschlagen' : `${passed} Tests bestanden`);

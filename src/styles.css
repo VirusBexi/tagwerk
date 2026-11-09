@@ -3138,6 +3138,689 @@ button.sky-btn.only-phone {
   }
 }
 
+/* ================================================================= Erfolge
+   A medal is a small sun: hard-edged rings in the colour of its group. A locked
+   one is grey and wears its progress as a thin ring. */
+.medal {
+  --s: 56px;
+  --p: 0;
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: var(--c, var(--sun));
+}
+.medal i {
+  position: relative;
+  font-style: normal;
+  font-size: calc(var(--s) * 0.42);
+  line-height: 1;
+}
+.medal.on {
+  box-shadow: inset 0 0 0 calc(var(--s) * 0.1) rgba(20, 18, 43, 0.22);
+}
+@supports (color: color-mix(in srgb, red, blue)) {
+  .medal.on {
+    box-shadow: none;
+    background: radial-gradient(
+      circle closest-side,
+      color-mix(in srgb, var(--c), #fff 40%) 0 60%,
+      var(--c) 61% 80%,
+      color-mix(in srgb, var(--c), var(--ink) 36%) 81% 100%
+    );
+  }
+}
+.medal.off {
+  background: var(--tile-2);
+}
+.medal.off i {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+.medal.off::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--c, var(--sun)) calc(var(--p) * 1%), transparent 0);
+  -webkit-mask: radial-gradient(circle closest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+  mask: radial-gradient(circle closest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+}
+
+/* The banner that drops in when a badge is earned. */
+.bdg-root {
+  position: fixed;
+  z-index: 78;
+  top: calc(var(--st) + 10px);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.bdg-pop {
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(372px, calc(100vw - 24px));
+  padding: 10px 16px 10px 10px;
+  border-radius: 22px;
+  background: var(--panel-2);
+  box-shadow:
+    0 14px 40px rgba(4, 5, 20, 0.6),
+    inset 0 0 0 1.5px var(--c, var(--sun));
+  text-align: left;
+  overflow: hidden;
+  animation: bdgIn 0.62s var(--spring) backwards;
+}
+.bdg-pop.out {
+  animation: bdgOut 0.24s ease-in forwards;
+}
+.bdg-pop .medal {
+  --s: 52px;
+  animation: medalPop 0.7s 0.2s var(--spring) backwards;
+}
+.bdg-pop-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 36%, rgba(255, 255, 255, 0.17) 50%, transparent 64%);
+  transform: translateX(-100%);
+  animation: bdgShine 1.05s 0.5s ease-out forwards;
+  pointer-events: none;
+}
+.bdg-pop-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.bdg-pop-text small {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sun);
+}
+.bdg-pop-text b {
+  font: 800 18px/1.15 var(--display);
+}
+.bdg-pop-text span {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--fg-2);
+}
+@supports (color: color-mix(in srgb, red, blue)) {
+  .bdg-pop-text small {
+    color: color-mix(in srgb, var(--c, var(--sun)), #fff 35%);
+  }
+}
+@keyframes bdgIn {
+  from {
+    opacity: 0;
+    transform: translateY(-130%) scale(0.92);
+  }
+}
+@keyframes bdgOut {
+  to {
+    opacity: 0;
+    transform: translateY(-60%) scale(0.96);
+  }
+}
+@keyframes medalPop {
+  from {
+    transform: scale(0) rotate(-40deg);
+  }
+}
+@keyframes bdgShine {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.lvl-extra {
+  margin-top: 10px;
+  padding: 6px 13px;
+  border-radius: 99px;
+  background: rgba(20, 18, 43, 0.14);
+  font-size: 13.5px;
+  font-weight: 700;
+  animation: pageIn 0.4s 1.12s var(--ease) backwards;
+}
+
+/* The section in the Level tab. */
+.bdg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bdg-sum {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 14px;
+  border-radius: 20px;
+  background: var(--row);
+  text-align: left;
+  transition: transform 0.16s var(--ease);
+}
+.bdg-sum:active {
+  transform: scale(0.985);
+}
+.bdg-sum > .ic {
+  margin-left: auto;
+  font-size: 20px;
+  color: var(--fg-3);
+}
+.bdg-stack {
+  display: flex;
+  flex: none;
+}
+.bdg-stack-i {
+  position: relative;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--row);
+}
+.bdg-stack-i + .bdg-stack-i {
+  margin-left: -10px;
+}
+.bdg-sum-t {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.bdg-sum-t b {
+  font: 700 19px/1.2 var(--display);
+}
+.bdg-sum-t span {
+  font-size: 12.5px;
+  color: var(--fg-3);
+}
+.bdg-next-h {
+  padding: 4px 2px 0;
+  font-size: 12.5px;
+  color: var(--fg-3);
+}
+.bdg-next {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.bdg-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 14px 10px 11px;
+  border-radius: 20px;
+  background: var(--row);
+  text-align: center;
+  transition: transform 0.16s var(--ease);
+}
+.bdg-tile:active {
+  transform: scale(0.97);
+}
+.bdg-tile b {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-height: 2.5em;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.bdg-tile .bar {
+  width: 100%;
+  margin-top: auto;
+}
+.bdg-tile small {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--fg-3);
+}
+
+/* The gallery sheet. */
+.h2-count {
+  margin-left: 6px;
+  font: 600 14px var(--body);
+  font-stretch: 100%;
+  color: var(--fg-3);
+}
+.sheet-body:last-child {
+  padding-bottom: calc(14px + var(--sb));
+}
+.bdg-detail {
+  position: sticky;
+  top: -4px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 118px;
+  margin: -4px -16px 0;
+  padding: 8px 16px 14px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.bdg-detail-t {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.bdg-detail-t > b {
+  font: 800 20px/1.15 var(--display);
+}
+.bdg-detail-t > b + span {
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--fg-2);
+}
+.bdg-detail-t .bar {
+  margin-top: 6px;
+}
+.bdg-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-3);
+}
+.bdg-state.ok {
+  margin-top: 4px;
+  font-weight: 600;
+  color: var(--ok);
+}
+.bdg-state .ic {
+  font-size: 14px;
+}
+.bdg-group h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 2px 6px;
+  font: 600 12px var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.bdg-group h3 small {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.bdg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.bdg-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 3px 9px;
+  border-radius: 16px;
+  text-align: center;
+  transition: background 0.16s;
+}
+.bdg-cell > span:last-child {
+  max-width: 100%;
+  font-size: 11.5px;
+  line-height: 1.2;
+  color: var(--fg-3);
+  overflow-wrap: break-word;
+}
+.bdg-cell.done > span:last-child {
+  font-weight: 600;
+  color: var(--fg);
+}
+.bdg-cell.sel {
+  background: var(--tile-2);
+  box-shadow: inset 0 0 0 1.5px var(--c, var(--sun));
+}
+
+/* ========================================================== Wochenrückblick
+   One hue, seven bars on a baseline. Only the best day carries its number. */
+.wkc {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 12px 14px 16px;
+  border-radius: 20px;
+  background: var(--row);
+}
+.wkc-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.wkc-xp {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.wkc-xp b {
+  font: 800 46px/1 var(--display);
+  font-stretch: 85%;
+  font-variant-numeric: tabular-nums;
+}
+.wkc-xp small {
+  font: 700 16px var(--display);
+  color: var(--fg-3);
+}
+.wkc-delta {
+  font-size: 13.5px;
+  color: var(--fg-2);
+}
+.wkc-delta i {
+  margin-right: 5px;
+  font-style: normal;
+  font-size: 10px;
+}
+.wkc-delta.up {
+  color: var(--ok);
+}
+.wkc-chart {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.wkc-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+}
+.wkc-plot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 114px;
+  border-bottom: 1px solid var(--line);
+}
+.wkc-plot em {
+  position: relative;
+  font: 700 12px/1.2 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+/* The week before: wider, pale, behind. */
+.wkc-plot u {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(78%, 40px);
+  margin-left: calc(min(78%, 40px) / -2);
+  border-radius: 4px 4px 0 0;
+  background: var(--tile-2);
+  transition: height 0.45s var(--ease);
+}
+.wkc-plot i {
+  position: relative;
+  flex: none;
+  width: min(58%, 28px);
+  border-radius: 4px 4px 0 0;
+  background: var(--sun);
+  transform-origin: 50% 100%;
+  transition:
+    height 0.45s var(--ease),
+    background 0.16s;
+  animation: barUp 0.6s var(--ease) backwards;
+}
+.wkc-col.sel .wkc-plot i {
+  background: #ffdd96;
+}
+@media (hover: hover) {
+  .wkc-col:hover .wkc-plot i {
+    background: #ffdd96;
+  }
+}
+.wkc-col.zero:not(.future) .wkc-plot i {
+  height: 2px !important;
+  border-radius: 0;
+  background: var(--tile-2);
+}
+.wkc-wd {
+  font-size: 12px;
+  text-align: center;
+  color: var(--fg-3);
+}
+.wkc-col.now .wkc-wd {
+  font-weight: 700;
+  color: var(--fg);
+}
+.wkc-col.sel .wkc-wd {
+  font-weight: 700;
+  color: var(--sun);
+}
+.wkc-tip {
+  min-height: 1.4em;
+  margin-top: -4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--fg-2);
+}
+.stats.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.wkc-cats {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wkc-cats li {
+  display: grid;
+  grid-template-columns: minmax(0, 112px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+}
+.wkc-cat {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--fg-2);
+}
+.wkc-cats b {
+  min-width: 2.8em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+@keyframes barUp {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+/* =================================================================== Himmel */
+.sky-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 128px;
+  gap: 10px;
+  margin: 0 calc(-1 * var(--gutter-r)) 0 calc(-1 * var(--gutter-l));
+  padding: 6px var(--gutter-r) 6px var(--gutter-l);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--gutter-l);
+  scrollbar-width: none;
+}
+.sky-strip::-webkit-scrollbar {
+  display: none;
+}
+.sky-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+  scroll-snap-align: start;
+}
+.sky-frame {
+  position: relative;
+  display: block;
+  margin-bottom: 6px;
+  border-radius: 16px;
+  overflow: hidden;
+  transition:
+    transform 0.2s var(--spring),
+    box-shadow 0.2s;
+}
+.sky-card:active .sky-frame {
+  transform: scale(0.96);
+}
+.sky-pic {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.sky-card.on .sky-frame {
+  box-shadow:
+    0 0 0 2px var(--ground),
+    0 0 0 4.5px var(--sun);
+}
+.sky-card.locked .sky-pic {
+  filter: saturate(0.55) brightness(0.7);
+}
+.sky-mark {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(11, 13, 36, 0.72);
+  font-size: 14px;
+  color: var(--fg);
+}
+.sky-mark.on {
+  background: var(--sun);
+  color: var(--ink);
+}
+.sky-name {
+  font: 700 14.5px/1.2 var(--display);
+}
+.sky-card.locked .sky-name {
+  color: var(--fg-2);
+}
+.sky-note {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--fg-3);
+}
+
+/* ======================================================= Sortieren per Ziehen */
+.row-wrap[data-drag] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.list.sorting .row-wrap:not(.dragging) {
+  transition: transform 0.24s var(--ease);
+}
+.row-wrap.dragging,
+.row-wrap.dropping {
+  z-index: 6;
+}
+.row-wrap .row {
+  transition:
+    box-shadow 0.2s,
+    background 0.2s;
+}
+.row-wrap.dragging .row {
+  background: var(--panel-2);
+  box-shadow: 0 14px 34px rgba(4, 5, 20, 0.55);
+}
+.row-wrap.dragging .row-under {
+  visibility: hidden;
+}
+html.is-sorting,
+html.is-sorting * {
+  cursor: grabbing !important;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ============================================================ Schnelleingabe */
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  margin-top: -8px;
+}
+.quick .hint {
+  line-height: 1.35;
+}
+.qchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 9px 0 12px;
+  border-radius: 99px;
+  background: rgba(255, 193, 69, 0.15);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sun);
+  animation: chipPop 0.3s var(--spring) backwards;
+}
+.qchip:active {
+  transform: scale(0.94);
+}
+.qchip .ic {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+@media (min-width: 960px) {
+  .bdg-root {
+    top: 18px;
+    left: calc(96px + 33vw);
+  }
+  .bdg-grid {
+    gap: 8px;
+  }
+  .wkc {
+    padding: 14px 18px 18px;
+  }
+  .wkc-plot i {
+    width: min(50%, 34px);
+  }
+  .sky-strip {
+    grid-auto-columns: minmax(0, 1fr);
+    margin: 0;
+    padding: 6px 0;
+    overflow: visible;
+  }
+  .row-wrap[data-drag] .row {
+    cursor: grab;
+  }
+}
+
 /* Motion off: no decoration, everything still works. */
 @media (prefers-reduced-motion: reduce) {
   *,

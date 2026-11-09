@@ -291,6 +291,32 @@ const Sound = (() => {
       [24, 31, 36].forEach((s, i) => bell(m2f(r + s), t + 0.86 + i * 0.13, 2, 0.18));
       thump(t + 0.72, 0.55, 100, 40, 0.5);
     },
+    /* A medal lands: a metallic clink, then a short sparkle that climbs. */
+    badge(t) {
+      const r = PACKS[L.pack].root;
+      thump(t, 0.5, 160, 60, 0.16);
+      bell(m2f(r + 19), t, 0.5, 0.26, 2.76, 1.6);
+      bell(m2f(r + 31), t + 0.012, 0.32, 0.12, 3.4, 1.2);
+      [12, 16, 19, 24, 28].forEach((s, i) => note(r + s, t + 0.16 + i * 0.07, 0.3));
+      pad([r - 12, r - 5, r, r + 4], t + 0.16, 1.3, 0.04);
+      bell(m2f(r + 36), t + 0.54, 1.5, 0.16);
+    },
+    /* Picking a row up and setting it down again. */
+    grab(t) {
+      tone('sine', 300, t, 0.09, 0.34, { to: 560, send: 0.1 });
+      noise(t, 0.05, 0.12, { f: 2400 });
+    },
+    drop(t) {
+      thump(t, 0.4, 190, 80, 0.09);
+      note(PACKS[L.pack].root - 5, t + 0.012, 0.3);
+    },
+    /* A new sky rolls in. */
+    sky(t) {
+      const r = PACKS[L.pack].root - 12;
+      noise(t, 0.7, 0.16, { f: 500, to: 3800, q: 0.6 });
+      pad([r, r + 7, r + 11, r + 16], t + 0.05, 1.5, 0.045);
+      [12, 19, 23, 28].forEach((s, i) => note(r + s, t + 0.2 + i * 0.09, 0.24));
+    },
   };
 
   function play(name, opts) {

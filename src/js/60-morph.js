@@ -91,6 +91,8 @@ function playFlip(map) {
   if (!motionOK()) return;
   for (const [el, top] of map) {
     if (!el.isConnected) continue;
+    // Moving a node restarts its entry animation: a row that only changes places must not fade in again.
+    for (const a of el.getAnimations()) if (a.animationName === 'rowIn') a.finish();
     const dy = top - el.getBoundingClientRect().top;
     if (Math.abs(dy) < 1) continue;
     el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], {

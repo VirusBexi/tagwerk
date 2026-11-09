@@ -1,5 +1,5 @@
 // Tagwerk service worker: keeps the app working offline.
-const VERSION = '967a492dc9';
+const VERSION = '11132e43f2';
 const APP_CACHE = `tagwerk-${VERSION}`;
 const FONT_CACHE = 'tagwerk-fonts';
 const APP_FILES = [
